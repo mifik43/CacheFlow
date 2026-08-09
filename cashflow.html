@@ -732,6 +732,33 @@ let pending = {
   cashOnHand: 0
 };
 
+function saveState() {
+  const data = {
+    committed,
+    pending,
+    gameMode,
+    fastTrackBaselinePassive,
+    fastTrackMultiplier
+  };
+  localStorage.setItem('cashflow-state', JSON.stringify(data));
+}
+
+function loadState() {
+  const raw = localStorage.getItem('cashflow-state');
+  if (!raw) return false;
+  try {
+    const data = JSON.parse(raw);
+    committed = data.committed || {income:[],expense:[],asset:[],liability:[],passive:[],cashOnHand:0};
+    pending = data.pending || {income:[],expense:[],asset:[],liability:[],passive:[],cashOnHand:0};
+    gameMode = data.gameMode || 'rat-race';
+    fastTrackBaselinePassive = data.fastTrackBaselinePassive || 0;
+    fastTrackMultiplier = data.fastTrackMultiplier || 1;
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
 function cloneState(s) {
   return JSON.parse(JSON.stringify(s));
 }
@@ -789,6 +816,7 @@ function collectCashflow() {
   pending.cashOnHand += t.cashflow;
   updateCashUI();
   renderStaging();
+  saveState();
 }
 
 function quitJob() {
@@ -796,6 +824,7 @@ function quitJob() {
   pending.cashOnHand -= t.totalExpense;
   updateCashUI();
   renderStaging();
+  saveState();
 }
 
 function addCash() {
@@ -805,6 +834,7 @@ function addCash() {
   pending.cashOnHand += num;
   updateCashUI();
   renderStaging();
+  saveState();
 }
 
 function removeCash() {
@@ -814,6 +844,7 @@ function removeCash() {
   pending.cashOnHand -= num;
   updateCashUI();
   renderStaging();
+  saveState();
 }
 
 function takeLoan() {
@@ -833,6 +864,7 @@ function takeLoan() {
   pending.expense.push({name: expenseName, value: interest});
   renderAll();
   renderStaging();
+  saveState();
   
   const liabilityContainer = document.getElementById('liability-rows');
   const lastLiability = liabilityContainer.lastElementChild;
@@ -943,6 +975,7 @@ function buyDeal(type, idx) {
   pending.passive.push({name: deal.name + ' (доход)', value: deal.income});
   renderAll();
   renderStaging();
+  saveState();
   checkEscape();
 }
 
@@ -956,6 +989,7 @@ function escapeRatRace() {
   fastTrackMultiplier = 1;
   updateCashUI();
   renderStaging();
+  saveState();
   checkEscape();
 }
 
@@ -967,6 +1001,7 @@ function restartGame() {
   document.getElementById('transition-overlay').classList.remove('visible');
   reset();
   setGameMode('rat-race');
+  saveState();
 }
 
 function renderAll() {
@@ -1110,6 +1145,7 @@ function commit() {
   committed = cloneState(pending);
   updateSummary(committed);
   renderStaging();
+  saveState();
   checkEscape();
 }
 
@@ -1118,6 +1154,7 @@ function revert() {
   renderAll();
   updateSummary(committed);
   renderStaging();
+  saveState();
 }
 
 function loadProfession(key) {
@@ -1136,6 +1173,7 @@ function loadProfession(key) {
   renderAll();
   updateSummary(committed);
   renderStaging();
+  saveState();
   
   if (FAST_TRACK_PROFESSIONS[key]) {
     fastTrackBaselinePassive = pending.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
@@ -1157,6 +1195,7 @@ function reset() {
   renderAll();
   updateSummary(committed);
   renderStaging();
+  saveState();
 }
 
 function exportJSON() {
@@ -1195,8 +1234,15 @@ document.getElementById('add-cash').addEventListener('click', addCash);
 document.getElementById('remove-cash').addEventListener('click', removeCash);
 document.getElementById('take-loan').addEventListener('click', takeLoan);
 
-loadProfession('engineer');
-setGameMode('rat-race');
+if (!loadState()) {
+  loadProfession('engineer');
+  setGameMode('rat-race');
+  saveState();
+} else {
+  renderAll();
+  updateSummary(pending);
+  renderStaging();
+}
 </script>
 </body>
 </html>
