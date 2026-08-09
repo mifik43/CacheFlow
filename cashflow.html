@@ -367,6 +367,77 @@
     padding: 10px 12px;
     font-size: 14px;
   }
+  .buy-stocks-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.9);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .buy-stocks-overlay.visible { display: flex; }
+  .buy-stocks-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+  }
+  .buy-stocks-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
+  .buy-stocks-modal input {
+    width: 100%;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .buy-stocks-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
+  .buy-stocks-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
+  .buy-stocks-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .sell-stocks-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.9);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .sell-stocks-overlay.visible { display: flex; }
+  .sell-stocks-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+  }
+  .sell-stocks-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
+  .sell-stocks-modal input {
+    width: 100%;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .sell-stocks-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
+  .sell-stocks-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
+  .sell-stocks-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .stock-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .stock-row .stock-name { flex: 2 1 160px; min-width: 0; }
+  .stock-row .stock-price { flex: 1 1 90px; min-width: 0; text-align: right; }
+  .stock-row .stock-count { flex: 1 1 70px; min-width: 0; text-align: right; }
+  .stock-row .stock-total { flex: 1 1 100px; min-width: 0; text-align: right; font-weight: 600; }
+  .stock-row .stock-buy { flex: 0 0 auto; padding: 6px 10px; font-size: 12px; background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 600; }
+  .stock-row .stock-sell { flex: 0 0 auto; padding: 6px 10px; font-size: 12px; background: var(--green); color: #0f172a; border-color: var(--green); font-weight: 600; }
   .buy-property-modal input:focus { outline: none; border-color: var(--accent); }
   .transition-overlay {
     display: none;
@@ -473,6 +544,7 @@
         <button id="remove-cash">➖ Удалить наличность</button>
         <button id="take-loan">🏦 Взять кредит</button>
         <button id="buy-property">🏠 Купить недвижимость</button>
+        <button id="buy-stocks">📈 Купить акции</button>
       </div>
       <div class="bar-wrap">
         <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
@@ -514,6 +586,11 @@
       <h2>Сбережения / Активы</h2>
       <div id="asset-rows"></div>
       <button class="category-add" data-section="asset">+ Добавить актив</button>
+    </section>
+
+    <section class="card col-6">
+      <h2>Акции</h2>
+      <div id="stocks-rows"></div>
     </section>
 
     <section class="card col-6">
@@ -571,6 +648,46 @@
       <div class="actions" style="justify-content:center;">
         <button class="primary" id="confirm-buy-property">Подтвердить покупку</button>
         <button id="cancel-buy-property">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="buy-stocks-overlay" class="buy-stocks-overlay">
+    <div class="buy-stocks-modal">
+      <h2>📈 Купить акции</h2>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+        <input type="text" id="stock-name" placeholder="Название компании" inputmode="text" />
+        <input type="number" id="stock-price" placeholder="Цена за акцию (₽)" min="0" step="1" inputmode="numeric" />
+        <input type="number" id="stock-count" placeholder="Количество акций" min="0" step="1" inputmode="numeric" />
+        <input type="text" id="stock-total" placeholder="Итоговая сумма (₽)" readonly inputmode="numeric" />
+      </div>
+      <div class="total-row">
+        <span>Итоговая сумма:</span>
+        <span class="total-value" id="stock-total-display">0 ₽</span>
+      </div>
+      <div class="actions" style="justify-content:center;">
+        <button class="primary" id="confirm-buy-stocks">Подтвердить покупку</button>
+        <button id="cancel-buy-stocks">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sell-stocks-overlay" class="sell-stocks-overlay">
+    <div class="sell-stocks-modal">
+      <h2>📉 Продать акции</h2>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+        <input type="text" id="sell-stock-name" placeholder="Название компании" inputmode="text" />
+        <input type="number" id="sell-stock-price" placeholder="Цена за акцию (₽)" min="0" step="1" inputmode="numeric" />
+        <input type="number" id="sell-stock-count" placeholder="Количество для продажи" min="0" step="1" inputmode="numeric" />
+        <input type="text" id="sell-stock-total" placeholder="Итоговая сумма продажи (₽)" readonly inputmode="numeric" />
+      </div>
+      <div class="total-row">
+        <span>Итоговая сумма продажи:</span>
+        <span class="total-value" id="sell-stock-total-display">0 ₽</span>
+      </div>
+      <div class="actions" style="justify-content:center;">
+        <button class="primary" id="confirm-sell-stocks">Подтвердить продажу</button>
+        <button id="cancel-sell-stocks">Отмена</button>
       </div>
     </div>
   </div>
@@ -790,10 +907,12 @@ const FAST_TRACK_DEALS = {
   ]
 };
 const sectionMeta = {
-  expense:    {id:'expense-rows',   label:'Расход',         currency:true, direction:'down'},
-  asset:      {id:'asset-rows',     label:'Актив',          currency:false, direction:'up'},
-  liability:  {id:'liability-rows', label:'Пассив',         currency:false, direction:'down'},
-  passive:    {id:'passive-rows',   label:'Пассивный доход', currency:true, direction:'up'}
+  income:     {id:'income-rows',     label:'Доход',         currency:true, direction:'up'},
+  expense:    {id:'expense-rows',    label:'Расход',         currency:true, direction:'down'},
+  asset:      {id:'asset-rows',      label:'Актив',          currency:false, direction:'up'},
+  liability:  {id:'liability-rows',  label:'Пассив',         currency:false, direction:'down'},
+  passive:    {id:'passive-rows',    label:'Пассивный доход', currency:true, direction:'up'},
+  stocks:     {id:'stocks-rows',     label:'Акции',          currency:false, direction:'up'}
 };
 
 let gameMode = 'rat-race'; // 'rat-race' | 'fast-track'
@@ -806,6 +925,7 @@ let committed = {
   asset: [],
   liability: [],
   passive: [],
+  stocks: [],
   cashOnHand: 0
 };
 
@@ -815,6 +935,7 @@ let pending = {
   asset: [],
   liability: [],
   passive: [],
+  stocks: [],
   cashOnHand: 0
 };
 
@@ -834,11 +955,13 @@ function loadState() {
   if (!raw) return false;
   try {
     const data = JSON.parse(raw);
-    committed = data.committed || {income:[],expense:[],asset:[],liability:[],passive:[],cashOnHand:0};
-    pending = data.pending || {income:[],expense:[],asset:[],liability:[],passive:[],cashOnHand:0};
+    committed = data.committed || {income:[],expense:[],asset:[],liability:[],passive:[],stocks:[],cashOnHand:0};
+    pending = data.pending || {income:[],expense:[],asset:[],liability:[],passive:[],stocks:[],cashOnHand:0};
     gameMode = data.gameMode || 'rat-race';
     fastTrackBaselinePassive = data.fastTrackBaselinePassive || 0;
     fastTrackMultiplier = data.fastTrackMultiplier || 1;
+    if (!committed.stocks) committed.stocks = [];
+    if (!pending.stocks) pending.stocks = [];
     return true;
   } catch(e) {
     return false;
@@ -894,6 +1017,35 @@ function renderSection(section) {
       saveState();
     });
   });
+}
+
+function renderStocks() {
+  const container = document.getElementById('stocks-rows');
+  container.innerHTML = pending.stocks.map((stock, idx) => {
+    const total = (Number(stock.price) || 0) * (Number(stock.count) || 0);
+    return `<div class="stock-row">
+      <div class="stock-name">${stock.name}</div>
+      <div class="stock-price">${fmt(Number(stock.price) || 0)}</div>
+      <div class="stock-count">${Number(stock.count) || 0}</div>
+      <div class="stock-total">${fmt(total)}</div>
+      <button class="stock-buy" title="Купить" aria-label="Купить">Купить</button>
+      <button class="stock-sell" title="Продать" aria-label="Продать">Продать</button>
+    </div>`;
+  }).join('');
+
+  container.querySelectorAll('.stock-row').forEach((row, idx) => {
+    const stock = pending.stocks[idx];
+    const buyBtn = row.querySelector('.stock-buy');
+    const sellBtn = row.querySelector('.stock-sell');
+
+    buyBtn.addEventListener('click', () => openBuyStocks(idx));
+    sellBtn.addEventListener('click', () => openSellStocks(idx));
+  });
+}
+
+function updateStockTotal(row, stock) {
+  const total = (Number(stock.price) || 0) * (Number(stock.count) || 0);
+  row.querySelector('.stock-total').textContent = fmt(total);
 }
 
 function syncLinked(sourceSection, removedName) {
@@ -993,6 +1145,33 @@ function buyProperty() {
   nameInput.focus();
 }
 
+let buyStockIndex = -1;
+
+function buyStocks() {
+  buyStockIndex = -1;
+  const overlay = document.getElementById('buy-stocks-overlay');
+  document.getElementById('stock-name').value = '';
+  document.getElementById('stock-price').value = '';
+  document.getElementById('stock-count').value = '';
+  document.getElementById('stock-total').value = '';
+  document.getElementById('stock-total-display').textContent = '0 ₽';
+  overlay.classList.add('visible');
+  document.getElementById('stock-name').focus();
+}
+
+function openBuyStocks(idx) {
+  buyStockIndex = idx;
+  const stock = pending.stocks[idx];
+  const overlay = document.getElementById('buy-stocks-overlay');
+  document.getElementById('stock-name').value = stock ? stock.name : '';
+  document.getElementById('stock-price').value = stock ? stock.price : '';
+  document.getElementById('stock-count').value = '';
+  document.getElementById('stock-total').value = '';
+  document.getElementById('stock-total-display').textContent = '0 ₽';
+  overlay.classList.add('visible');
+  document.getElementById('stock-count').focus();
+}
+
 function confirmBuyProperty() {
   const nameInput = document.getElementById('prop-name');
   const downInput = document.getElementById('prop-down');
@@ -1022,6 +1201,115 @@ function confirmBuyProperty() {
 
 function cancelBuyProperty() {
   document.getElementById('buy-property-overlay').classList.remove('visible');
+}
+
+function updateStockFormTotal() {
+  const price = Math.max(0, Number(document.getElementById('stock-price').value) || 0);
+  const count = Math.max(0, Number(document.getElementById('stock-count').value) || 0);
+  const total = price * count;
+  document.getElementById('stock-total').value = total;
+  document.getElementById('stock-total-display').textContent = fmt(total);
+}
+
+function confirmBuyStocks() {
+  const nameInput = document.getElementById('stock-name');
+  const priceInput = document.getElementById('stock-price');
+  const countInput = document.getElementById('stock-count');
+  const overlay = document.getElementById('buy-stocks-overlay');
+
+  const name = nameInput.value.trim();
+  const price = Math.max(0, Number(priceInput.value) || 0);
+  const count = Math.max(0, Number(countInput.value) || 0);
+  const total = price * count;
+
+  if (!name) { nameInput.focus(); return; }
+  if (price <= 0) { priceInput.focus(); return; }
+  if (count <= 0) { countInput.focus(); return; }
+
+  const existingIdx = pending.stocks.findIndex(s => s.name === name);
+  if (existingIdx >= 0) {
+    pending.stocks[existingIdx].count = (Number(pending.stocks[existingIdx].count) || 0) + count;
+    pending.stocks[existingIdx].price = price;
+  } else {
+    pending.stocks.push({name, price, count});
+  }
+
+  pending.cashOnHand -= total;
+
+  overlay.classList.remove('visible');
+  renderAll();
+  updateCashUI();
+  renderStaging();
+  saveState();
+  checkEscape();
+  buyStockIndex = -1;
+}
+
+function cancelBuyStocks() {
+  document.getElementById('buy-stocks-overlay').classList.remove('visible');
+}
+
+let sellStockIndex = -1;
+
+function openSellStocks(idx) {
+  sellStockIndex = idx;
+  const stock = pending.stocks[idx];
+  if (!stock) return;
+  document.getElementById('sell-stock-name').value = stock.name;
+  document.getElementById('sell-stock-price').value = stock.price;
+  document.getElementById('sell-stock-count').value = stock.count;
+  updateSellFormTotal();
+  document.getElementById('sell-stocks-overlay').classList.add('visible');
+  document.getElementById('sell-stock-price').focus();
+}
+
+function updateSellFormTotal() {
+  const price = Math.max(0, Number(document.getElementById('sell-stock-price').value) || 0);
+  const count = Math.max(0, Number(document.getElementById('sell-stock-count').value) || 0);
+  const total = price * count;
+  document.getElementById('sell-stock-total').value = total;
+  document.getElementById('sell-stock-total-display').textContent = fmt(total);
+}
+
+function confirmSellStocks() {
+  const nameInput = document.getElementById('sell-stock-name');
+  const priceInput = document.getElementById('sell-stock-price');
+  const countInput = document.getElementById('sell-stock-count');
+  const overlay = document.getElementById('sell-stocks-overlay');
+
+  const name = nameInput.value.trim();
+  const price = Math.max(0, Number(priceInput.value) || 0);
+  const count = Math.max(0, Number(countInput.value) || 0);
+  const total = price * count;
+
+  if (!name) { nameInput.focus(); return; }
+  if (price <= 0) { priceInput.focus(); return; }
+  if (count <= 0) { countInput.focus(); return; }
+
+  if (sellStockIndex >= 0 && sellStockIndex < pending.stocks.length) {
+    const stock = pending.stocks[sellStockIndex];
+    const currentCount = Number(stock.count) || 0;
+    if (count >= currentCount) {
+      pending.stocks.splice(sellStockIndex, 1);
+    } else {
+      stock.count = currentCount - count;
+    }
+  }
+
+  pending.cashOnHand += total;
+
+  overlay.classList.remove('visible');
+  renderAll();
+  updateCashUI();
+  renderStaging();
+  saveState();
+  checkEscape();
+  sellStockIndex = -1;
+}
+
+function cancelSellStocks() {
+  document.getElementById('sell-stocks-overlay').classList.remove('visible');
+  sellStockIndex = -1;
 }
 
 function setGameMode(mode) {
@@ -1152,16 +1440,27 @@ function restartGame() {
 }
 
 function renderAll() {
-  Object.keys(sectionMeta).forEach(renderSection);
+  Object.keys(sectionMeta).forEach(section => {
+    if (section === 'stocks') renderStocks();
+    else renderSection(section);
+  });
 }
 
 function addEmpty(section) {
-  pending[section].push({name:'', value:0});
-  renderSection(section);
+  if (section === 'stocks') {
+    pending.stocks.push({name:'', price:0, count:0});
+    renderStocks();
+  } else {
+    pending[section].push({name:'', value:0});
+    renderSection(section);
+  }
   renderStaging();
   const meta = sectionMeta[section];
   const last = document.getElementById(meta.id).lastElementChild;
-  if (last) last.querySelector('.rname').focus();
+  if (last) {
+    const nameField = last.querySelector('.rname, .stock-name');
+    if (nameField) nameField.focus();
+  }
 }
 
 function calculateFrom(state) {
@@ -1253,6 +1552,8 @@ function computeDiff() {
     {key:'totalIncome', label:'Общий доход'},
     {key:'totalPassive', label:'Пассивный доход'},
     {key:'cashflow', label:'Денежный поток'},
+    {key:'totalAssets', label:'Общие активы'},
+    {key:'totalLiabilities', label:'Общие пассивы'},
     {key:'netWorth', label:'Чистые активы'},
     {key:'cashOnHand', label:'Наличность'}
   ];
@@ -1260,6 +1561,45 @@ function computeDiff() {
   for (const a of aggregates) {
     if (committedTotals[a.key] !== pendingTotals[a.key]) {
       diffs.push({type:'modified', section:'_agg', text: `~ ${a.label}: ${fmt(committedTotals[a.key])} → ${fmt(pendingTotals[a.key])}`});
+    }
+  }
+
+  const committedStocks = committed.stocks || [];
+  const pendingStocks = pending.stocks || [];
+  const cUsedStocks = new Array(committedStocks.length).fill(false);
+  const pUsedStocks = new Array(pendingStocks.length).fill(false);
+
+  for (let pi = 0; pi < pendingStocks.length; pi++) {
+    for (let ci = 0; ci < committedStocks.length; ci++) {
+      if (!cUsedStocks[ci] && !pUsedStocks[pi] && committedStocks[ci].name === pendingStocks[pi].name && committedStocks[ci].price * committedStocks[ci].count === pendingStocks[pi].price * pendingStocks[pi].count) {
+        cUsedStocks[ci] = true;
+        pUsedStocks[pi] = true;
+        break;
+      }
+    }
+  }
+
+  for (let pi = 0; pi < pendingStocks.length; pi++) {
+    if (pUsedStocks[pi]) continue;
+    for (let ci = 0; ci < committedStocks.length; ci++) {
+      if (!cUsedStocks[ci] && !pUsedStocks[pi] && committedStocks[ci].name === pendingStocks[pi].name) {
+        cUsedStocks[ci] = true;
+        pUsedStocks[pi] = true;
+        diffs.push({type:'modified', section:'stocks', text: `~ ${committedStocks[ci].name}: ${Number(committedStocks[ci].count)||0} шт → ${Number(pendingStocks[pi].count)||0} шт`});
+        break;
+      }
+    }
+  }
+
+  for (let ci = 0; ci < committedStocks.length; ci++) {
+    if (!cUsedStocks[ci]) {
+      diffs.push({type:'removed', section:'stocks', text: `- ${committedStocks[ci].name || '(без названия)'} = ${Number(committedStocks[ci].count)||0} шт`});
+    }
+  }
+
+  for (let pi = 0; pi < pendingStocks.length; pi++) {
+    if (!pUsedStocks[pi]) {
+      diffs.push({type:'added', section:'stocks', text: `+ ${pendingStocks[pi].name || '(без названия)'} = ${Number(pendingStocks[pi].count)||0} шт`});
     }
   }
 
@@ -1318,6 +1658,7 @@ function loadProfession(key) {
     asset: p.assets.map(i=>({...i})),
     liability: p.liabilities.map(i=>({...i})),
     passive: p.passive ? p.passive.map(i=>({...i})) : [],
+    stocks: [],
     cashOnHand: 0
   };
   committed = cloneState(base);
@@ -1339,7 +1680,7 @@ function loadProfession(key) {
 }
 
 function reset() {
-  const empty = {income:[],expense:[],asset:[],liability:[],passive:[],cashOnHand:0};
+  const empty = {income:[],expense:[],asset:[],liability:[],passive:[],stocks:[],cashOnHand:0};
   committed = cloneState(empty);
   pending = cloneState(empty);
   fastTrackBaselinePassive = 0;
@@ -1388,6 +1729,15 @@ document.getElementById('take-loan').addEventListener('click', takeLoan);
 document.getElementById('buy-property').addEventListener('click', buyProperty);
 document.getElementById('confirm-buy-property').addEventListener('click', confirmBuyProperty);
 document.getElementById('cancel-buy-property').addEventListener('click', cancelBuyProperty);
+document.getElementById('buy-stocks').addEventListener('click', buyStocks);
+document.getElementById('confirm-buy-stocks').addEventListener('click', confirmBuyStocks);
+document.getElementById('cancel-buy-stocks').addEventListener('click', cancelBuyStocks);
+document.getElementById('stock-price').addEventListener('input', updateStockFormTotal);
+document.getElementById('stock-count').addEventListener('input', updateStockFormTotal);
+document.getElementById('confirm-sell-stocks').addEventListener('click', confirmSellStocks);
+document.getElementById('cancel-sell-stocks').addEventListener('click', cancelSellStocks);
+document.getElementById('sell-stock-price').addEventListener('input', updateSellFormTotal);
+document.getElementById('sell-stock-count').addEventListener('input', updateSellFormTotal);
 
 if (!loadState()) {
   loadProfession('engineer');
