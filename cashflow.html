@@ -506,7 +506,7 @@
   <div id="win-overlay" class="win-overlay">
     <div class="win-modal">
       <h2>🎉 Победа!</h2>
-      <p>Пассивный доход от инвестиций превышает расходы в 10 раз. Вы выиграли игру!</p>
+      <p>Пассивный доход увеличен на 50 000 ₽. Вы выиграли игру!</p>
       <button class="primary" id="restart-game">Начать заново</button>
     </div>
   </div>
@@ -697,6 +697,7 @@ const sectionMeta = {
 };
 
 let gameMode = 'rat-race'; // 'rat-race' | 'fast-track'
+let fastTrackBaselinePassive = 0;
 
 let committed = {
   income: [],
@@ -769,7 +770,7 @@ function setGameMode(mode) {
   
   if (mode === 'fast-track') {
     banner.className = 'game-banner visible fast-track';
-    banner.textContent = 'Скоростная дорожка: пассивный доход от инвестиций должен превысить расходы в 10 раз';
+    banner.textContent = 'Скоростная дорожка: увеличьте пассивный доход на 50 000 ₽ для победы';
     dealsSection.style.display = 'block';
   } else {
     banner.className = 'game-banner visible rat-race';
@@ -805,17 +806,18 @@ function checkEscape() {
       banner.textContent = `Крысиные бега: нужно ${missing.join(' и ')} для побега`;
     }
   } else if (gameMode === 'fast-track') {
-    const winTarget = t.totalExpense * 10;
-    const winPct = winTarget > 0 ? Math.min(100, Math.max(0, (t.totalPassive / winTarget) * 100)) : 100;
-    escapeIndicator.style.width = winPct + '%';
+    const winTarget = fastTrackBaselinePassive + 50000;
+    const winPct = winTarget > 0 ? Math.min(100, Math.max(0, ((t.totalPassive - fastTrackBaselinePassive) / 50000) * 100)) : 100;
+    escapeIndicator.style.width = Math.max(0, winPct) + '%';
     
     if (t.totalPassive >= winTarget && winTarget > 0) {
       banner.className = 'game-banner visible fast-track';
-      banner.textContent = '🏆 Вы выиграли! Пассивный доход превышает расходы в 10 раз!';
+      banner.textContent = '🏆 Вы выиграли! Пассивный доход увеличен на 50 000 ₽!';
       winOverlay.classList.add('visible');
     } else {
       banner.className = 'game-banner visible fast-track';
-      banner.textContent = `Скоростная дорожка: пассивный доход ${fmt(t.totalPassive)} из ${fmt(winTarget)} (${Math.round(winPct)}%)`;
+      const remaining = Math.max(0, winTarget - t.totalPassive);
+      banner.textContent = `Скоростная дорожка: увеличьте пассивный доход ещё на ${fmt(remaining)}`;
     }
   }
 }
@@ -863,6 +865,7 @@ function buyDeal(type, idx) {
 }
 
 function escapeRatRace() {
+  fastTrackBaselinePassive = pending.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
   setGameMode('fast-track');
   document.getElementById('transition-overlay').classList.remove('visible');
   checkEscape();
@@ -870,6 +873,7 @@ function escapeRatRace() {
 
 function restartGame() {
   gameMode = 'rat-race';
+  fastTrackBaselinePassive = 0;
   document.getElementById('win-overlay').classList.remove('visible');
   document.getElementById('transition-overlay').classList.remove('visible');
   reset();
@@ -1041,6 +1045,7 @@ function loadProfession(key) {
   renderStaging();
   
   if (FAST_TRACK_PROFESSIONS[key]) {
+    fastTrackBaselinePassive = pending.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
     setGameMode('fast-track');
   } else if (gameMode === 'fast-track') {
     setGameMode('rat-race');
@@ -1052,6 +1057,7 @@ function reset() {
   const empty = {income:[],expense:[],asset:[],liability:[],passive:[]};
   committed = cloneState(empty);
   pending = cloneState(empty);
+  fastTrackBaselinePassive = 0;
   renderAll();
   updateSummary(committed);
   renderStaging();
