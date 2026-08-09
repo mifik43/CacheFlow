@@ -177,6 +177,70 @@
     border-right: 2px solid #fff;
   }
 
+  .staging-area {
+    background: #0b1220;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 12px;
+  }
+  .staging-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .staging-title {
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #dirty-indicator {
+    display: none;
+    background: var(--amber);
+    color: #0f172a;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  #staging-actions {
+    display: none;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .staging-empty {
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+    padding: 8px 0;
+  }
+  .staging-list { max-height: 240px; overflow: auto; }
+  .diff-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+  }
+  .diff-added { background: rgba(74,222,128,0.1); color: var(--green); }
+  .diff-removed { background: rgba(248,113,113,0.1); color: var(--red); }
+  .diff-modified { background: rgba(251,191,36,0.1); color: var(--amber); }
+  .diff-section { font-weight: 600; min-width: 100px; }
+  .diff-op { font-weight: 700; }
+  .diff-old { text-decoration: line-through; opacity: 0.8; }
+  .diff-arrow { margin: 0 4px; }
+  .diff-new { font-weight: 600; }
+
   .category-add {
     display: inline-flex;
     align-items: center;
@@ -263,6 +327,16 @@
         </div>
         <div class="bar"><i id="balance-indicator"></i></div>
         <div class="hint" id="status-text">Введите данные, чтобы увидеть расчёт</div>
+      </div>
+      <div class="staging-area">
+        <div class="staging-header">
+          <div class="staging-title">Незафиксированные изменения <span id="dirty-indicator">!</span></div>
+          <div id="staging-actions">
+            <button class="primary" id="commit">Подтвердить</button>
+            <button id="revert">Отменить</button>
+          </div>
+        </div>
+        <div id="staging-list"></div>
       </div>
       <div class="actions">
         <button class="primary" id="reset">Сбросить</button>
@@ -432,13 +506,25 @@ const sectionMeta = {
   passive:    {id:'passive-rows',   label:'Пассивный доход', currency:true, direction:'up'}
 };
 
-let state = {
+let committed = {
   income: [],
   expense: [],
   asset: [],
   liability: [],
   passive: []
 };
+
+let pending = {
+  income: [],
+  expense: [],
+  asset: [],
+  liability: [],
+  passive: []
+};
+
+function cloneState(s) {
+  return JSON.parse(JSON.stringify(s));
+}
 
 function fmt(n) {
   const x = Number(n) || 0;
@@ -456,15 +542,32 @@ function rowHTML(name='', value='', isCurrency=false) {
 function renderSection(section) {
   const meta = sectionMeta[section];
   const container = document.getElementById(meta.id);
-  container.innerHTML = state[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency)).join('');
+  container.innerHTML = pending[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency)).join('');
   container.querySelectorAll('.row').forEach((row, idx) => {
-    const item = state[section][idx];
+    const item = pending[section][idx];
     row.querySelector('.rname').value = item.name;
     row.querySelector('.rvalue').value = item.value;
-    row.querySelector('.rname').addEventListener('input', e => { item.name = e.target.value; calculate(); });
-    row.querySelector('.rvalue').addEventListener('input', e => { item.value = Number(e.target.value) || 0; calculate(); });
-    row.querySelector('.remove').addEventListener('click', () => { state[section].splice(idx, 1); renderSection(section); calculate(); });
+    row.querySelector('.rname').addEventListener('input', e => { item.name = e.target.value; renderStaging(); });
+    row.querySelector('.rvalue').addEventListener('input', e => { item.value = Number(e.target.value) || 0; renderStaging(); });
+    row.querySelector('.remove').addEventListener('click', () => {
+      const removedName = pending[section][idx].name;
+      pending[section].splice(idx, 1);
+      syncLinked(section, removedName);
+      renderSection(section);
+      renderStaging();
+    });
   });
+}
+
+function syncLinked(sourceSection, removedName) {
+  if (!removedName) return;
+  const linked = sourceSection === 'expense' ? 'liability' : sourceSection === 'liability' ? 'expense' : null;
+  if (!linked) return;
+  const idx = pending[linked].findIndex(item => item.name === removedName);
+  if (idx !== -1) {
+    pending[linked].splice(idx, 1);
+    renderSection(linked);
+  }
 }
 
 function renderAll() {
@@ -472,14 +575,15 @@ function renderAll() {
 }
 
 function addEmpty(section) {
-  state[section].push({name:'', value:0});
+  pending[section].push({name:'', value:0});
   renderSection(section);
+  renderStaging();
   const meta = sectionMeta[section];
   const last = document.getElementById(meta.id).lastElementChild;
   if (last) last.querySelector('.rname').focus();
 }
 
-function calculate() {
+function calculateFrom(state) {
   const totalIncome = state.income.reduce((s,i)=>s+(Number(i.value)||0),0);
   const totalExpense = state.expense.reduce((s,i)=>s+(Number(i.value)||0),0);
   const totalPassive = state.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
@@ -487,58 +591,161 @@ function calculate() {
   const totalLiabilities = state.liability.reduce((s,i)=>s+(Number(i.value)||0),0);
   const cashflow = totalIncome + totalPassive - totalExpense;
   const netWorth = totalAssets - totalLiabilities;
+  return { totalIncome, totalExpense, totalPassive, totalAssets, totalLiabilities, cashflow, netWorth };
+}
 
-  document.getElementById('total-income').textContent = fmt(totalIncome);
-  document.getElementById('total-expenses').textContent = fmt(totalExpense);
-  document.getElementById('total-passive').textContent = fmt(totalPassive);
-  document.getElementById('cashflow').textContent = fmt(cashflow);
-  document.getElementById('net-worth').textContent = fmt(netWorth);
-
+function updateSummary(state) {
+  const t = calculateFrom(state);
+  document.getElementById('total-income').textContent = fmt(t.totalIncome);
+  document.getElementById('total-expenses').textContent = fmt(t.totalExpense);
+  document.getElementById('total-passive').textContent = fmt(t.totalPassive);
   const cfEl = document.getElementById('cashflow');
-  cfEl.className = 'value ' + (cashflow > 0 ? 'positive' : cashflow < 0 ? 'negative' : 'neutral');
+  cfEl.textContent = fmt(t.cashflow);
+  cfEl.className = 'value ' + (t.cashflow > 0 ? 'positive' : t.cashflow < 0 ? 'negative' : 'neutral');
+  document.getElementById('net-worth').textContent = fmt(t.netWorth);
 
-  const balance = totalIncome + totalPassive + totalExpense;
-  const pct = balance > 0 ? Math.max(0, Math.min(100, ((totalIncome + totalPassive) / balance) * 100)) : 50;
+  const balance = t.totalIncome + t.totalPassive + t.totalExpense;
+  const pct = balance > 0 ? Math.max(0, Math.min(100, ((t.totalIncome + t.totalPassive) / balance) * 100)) : 50;
   document.getElementById('balance-indicator').style.width = pct + '%';
 
   const status = document.getElementById('status-text');
-  if (cashflow > 0 && netWorth > 0) status.textContent = 'Отлично! Денежный поток положительный, активы превышают пассивы.';
-  else if (cashflow > 0) status.textContent = 'Денежный поток положительный, но пассивы превышают активы.';
-  else if (cashflow === 0) status.textContent = 'Денежный поток в нуле. Нужно оптимизировать расходы или увеличить доход.';
+  if (t.cashflow > 0 && t.netWorth > 0) status.textContent = 'Отлично! Денежный поток положительный, активы превышают пассивы.';
+  else if (t.cashflow > 0) status.textContent = 'Денежный поток положительный, но пассивы превышают активы.';
+  else if (t.cashflow === 0) status.textContent = 'Денежный поток в нуле. Нужно оптимизировать расходы или увеличить доход.';
   else status.textContent = 'Денежный поток отрицательный. Следует сократить расходы или увеличить доход.';
+}
+
+function computeDiff() {
+  const diffs = [];
+  const sections = Object.keys(sectionMeta);
+
+  for (const section of sections) {
+    const committedItems = committed[section];
+    const pendingItems = pending[section];
+
+    const cUsed = new Array(committedItems.length).fill(false);
+    const pUsed = new Array(pendingItems.length).fill(false);
+
+    for (let pi = 0; pi < pendingItems.length; pi++) {
+      for (let ci = 0; ci < committedItems.length; ci++) {
+        if (!cUsed[ci] && !pUsed[pi] && committedItems[ci].name === pendingItems[pi].name && committedItems[ci].value === pendingItems[pi].value) {
+          cUsed[ci] = true;
+          pUsed[pi] = true;
+          break;
+        }
+      }
+    }
+
+    for (let pi = 0; pi < pendingItems.length; pi++) {
+      if (pUsed[pi]) continue;
+      for (let ci = 0; ci < committedItems.length; ci++) {
+        if (!cUsed[ci] && !pUsed[pi] && committedItems[ci].name === pendingItems[pi].name) {
+          cUsed[ci] = true;
+          pUsed[pi] = true;
+          diffs.push({type:'modified', section, text: `~ ${committedItems[ci].name}: ${fmt(committedItems[ci].value)} → ${fmt(pendingItems[pi].value)}`});
+          break;
+        }
+      }
+    }
+
+    for (let ci = 0; ci < committedItems.length; ci++) {
+      if (!cUsed[ci]) {
+        diffs.push({type:'removed', section, text: `- ${committedItems[ci].name || '(без названия)'} = ${fmt(committedItems[ci].value)}`});
+      }
+    }
+
+    for (let pi = 0; pi < pendingItems.length; pi++) {
+      if (!pUsed[pi]) {
+        diffs.push({type:'added', section, text: `+ ${pendingItems[pi].name || '(без названия)'} = ${fmt(pendingItems[pi].value)}`});
+      }
+    }
+  }
+
+  const committedTotals = calculateFrom(committed);
+  const pendingTotals = calculateFrom(pending);
+
+  const aggregates = [
+    {key:'totalExpense', label:'Общие расходы'},
+    {key:'totalIncome', label:'Общий доход'},
+    {key:'totalPassive', label:'Пассивный доход'},
+    {key:'cashflow', label:'Денежный поток'},
+    {key:'netWorth', label:'Чистые активы'}
+  ];
+
+  for (const a of aggregates) {
+    if (committedTotals[a.key] !== pendingTotals[a.key]) {
+      diffs.push({type:'modified', section:'_agg', text: `~ ${a.label}: ${fmt(committedTotals[a.key])} → ${fmt(pendingTotals[a.key])}`});
+    }
+  }
+
+  return diffs;
+}
+
+function renderStaging() {
+  const diffs = computeDiff();
+  const list = document.getElementById('staging-list');
+  const actions = document.getElementById('staging-actions');
+  const indicator = document.getElementById('dirty-indicator');
+  
+  if (diffs.length === 0) {
+    list.innerHTML = '<div class="staging-empty">Нет изменений</div>';
+    actions.style.display = 'none';
+    indicator.style.display = 'none';
+  } else {
+    list.innerHTML = diffs.map(d => {
+      const cls = d.type === 'added' ? 'diff-added' : d.type === 'removed' ? 'diff-removed' : 'diff-modified';
+      const op = d.type === 'added' ? '+' : d.type === 'removed' ? '-' : '~';
+      const sectionLabel = d.section === '_agg' ? 'Итого' : sectionMeta[d.section].label;
+      return `<div class="diff-line ${cls}"><span class="diff-section">[${sectionLabel}]</span> <span class="diff-op">${op}</span> <span>${d.text}</span></div>`;
+    }).join('');
+    actions.style.display = 'flex';
+    indicator.style.display = 'inline';
+  }
+}
+
+function commit() {
+  committed = cloneState(pending);
+  updateSummary(committed);
+  renderStaging();
+}
+
+function revert() {
+  pending = cloneState(committed);
+  renderAll();
+  renderStaging();
 }
 
 function loadProfession(key) {
   const p = PROFESSIONS[key];
   if (!p) return;
-  state.income = p.income.map(i=>({...i}));
-  state.expense = p.expense.map(i=>({...i}));
-  state.asset = p.assets.map(i=>({...i}));
-  state.liability = p.liabilities.map(i=>({...i}));
-  state.passive = p.passive ? p.passive.map(i=>({...i})) : [];
+  const base = {
+    income: p.income.map(i=>({...i})),
+    expense: p.expense.map(i=>({...i})),
+    asset: p.assets.map(i=>({...i})),
+    liability: p.liabilities.map(i=>({...i})),
+    passive: p.passive ? p.passive.map(i=>({...i})) : []
+  };
+  committed = cloneState(base);
+  pending = cloneState(base);
   renderAll();
-  calculate();
+  updateSummary(committed);
+  renderStaging();
 }
 
 function reset() {
-  state = {income:[],expense:[],asset:[],liability:[],passive:[]};
+  const empty = {income:[],expense:[],asset:[],liability:[],passive:[]};
+  committed = cloneState(empty);
+  pending = cloneState(empty);
   renderAll();
-  calculate();
+  updateSummary(committed);
+  renderStaging();
 }
 
 function exportJSON() {
   const data = {
     date: new Date().toISOString(),
-    totals: {
-      income: state.income.reduce((s,i)=>s+(Number(i.value)||0),0),
-      expense: state.expense.reduce((s,i)=>s+(Number(i.value)||0),0),
-      passive: state.passive.reduce((s,i)=>s+(Number(i.value)||0),0),
-      assets: state.asset.reduce((s,i)=>s+(Number(i.value)||0),0),
-      liabilities: state.liability.reduce((s,i)=>s+(Number(i.value)||0),0)
-    },
-    cashflow: state.income.reduce((s,i)=>s+(Number(i.value)||0),0) + state.passive.reduce((s,i)=>s+(Number(i.value)||0),0) - state.expense.reduce((s,i)=>s+(Number(i.value)||0),0),
-    netWorth: state.asset.reduce((s,i)=>s+(Number(i.value)||0),0) - state.liability.reduce((s,i)=>s+(Number(i.value)||0),0),
-    details: state
+    totals: calculateFrom(committed),
+    details: committed
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -560,6 +767,8 @@ document.querySelectorAll('.category-add').forEach(btn => {
 
 document.getElementById('reset').addEventListener('click', reset);
 document.getElementById('export').addEventListener('click', exportJSON);
+document.getElementById('commit').addEventListener('click', commit);
+document.getElementById('revert').addEventListener('click', revert);
 
 loadProfession('engineer');
 </script>
