@@ -392,6 +392,9 @@
           <option value="police">Полицейский</option>
           <option value="nurse">Медсестра</option>
           <option value="mechanic">Механик</option>
+          <option value="business_manager">Бизнес-менеджер</option>
+          <option value="secretary">Секретарь</option>
+          <option value="truck_driver">Дальнобойщик</option>
         </optgroup>
         <optgroup label="Скоростная дорожка">
           <option value="investor">Инвестор</option>
@@ -644,6 +647,42 @@ const PROFESSIONS = {
     ],
     assets: [{name:'Сбережения', value:700},{name:'Акции', value:2500}],
     liabilities: [{name:'Ипотека', value:140000},{name:'Автокредит', value:16000}],
+    passive: []
+  },
+  business_manager: {
+    income: [{name:'Зарплата', value:4600}],
+    expense: [
+      {name:'Налоги', value:1200},{name:'Ипотека', value:1100},{name:'Автокредит', value:400},
+      {name:'Кредитные карты', value:250},{name:'Образование', value:200},
+      {name:'Продукты', value:650},{name:'Транспорт', value:350},
+      {name:'Развлечения', value:300},{name:'Коммунальные', value:250}
+    ],
+    assets: [{name:'Сбережения', value:1500},{name:'Акции', value:2500}],
+    liabilities: [{name:'Ипотека', value:160000},{name:'Автокредит', value:18000},{name:'Кредитные карты', value:3000}],
+    passive: []
+  },
+  secretary: {
+    income: [{name:'Зарплата', value:2500}],
+    expense: [
+      {name:'Налоги', value:500},{name:'Аренда', value:600},{name:'Автокредит', value:250},
+      {name:'Кредитные карты', value:200},
+      {name:'Продукты', value:500},{name:'Транспорт', value:200},
+      {name:'Развлечения', value:150},{name:'Коммунальные', value:120}
+    ],
+    assets: [{name:'Сбережения', value:400},{name:'Акции', value:800}],
+    liabilities: [{name:'Автокредит', value:10000},{name:'Кредитные карты', value:2000}],
+    passive: []
+  },
+  truck_driver: {
+    income: [{name:'Зарплата', value:2500}],
+    expense: [
+      {name:'Налоги', value:500},{name:'Аренда', value:500},{name:'Автокредит', value:400},
+      {name:'Кредитные карты', value:150},
+      {name:'Продукты', value:500},{name:'Транспорт', value:300},
+      {name:'Развлечения', value:150},{name:'Коммунальные', value:100}
+    ],
+    assets: [{name:'Сбережения', value:300}],
+    liabilities: [{name:'Автокредит', value:12000},{name:'Кредитные карты', value:1500}],
     passive: []
   }
 };
