@@ -784,14 +784,28 @@ function renderSection(section) {
     const item = pending[section][idx];
     row.querySelector('.rname').value = item.name;
     row.querySelector('.rvalue').value = item.value;
-    row.querySelector('.rname').addEventListener('input', e => { item.name = e.target.value; renderStaging(); });
-    row.querySelector('.rvalue').addEventListener('input', e => { item.value = Number(e.target.value) || 0; renderStaging(); });
+    row.querySelector('.rname').addEventListener('input', e => {
+      const oldName = item.name;
+      item.name = e.target.value;
+      const linked = section === 'expense' ? 'liability' : section === 'liability' ? 'expense' : null;
+      if (linked) {
+        const linkedItem = pending[linked].find(i => i.name === oldName);
+        if (linkedItem) {
+          linkedItem.name = e.target.value;
+          renderSection(linked);
+        }
+      }
+      renderStaging();
+      saveState();
+    });
+    row.querySelector('.rvalue').addEventListener('input', e => { item.value = Number(e.target.value) || 0; renderStaging(); saveState(); });
     row.querySelector('.remove').addEventListener('click', () => {
       const removedName = pending[section][idx].name;
       pending[section].splice(idx, 1);
       syncLinked(section, removedName);
       renderSection(section);
       renderStaging();
+      saveState();
     });
   });
 }
@@ -859,9 +873,8 @@ function takeLoan() {
   if (nameInput === null) return;
   const loanName = nameInput.trim() || defaultName;
   
-  const expenseName = `Проценты по ${loanName}`;
   pending.liability.push({name: loanName, value: amount});
-  pending.expense.push({name: expenseName, value: interest});
+  pending.expense.push({name: loanName, value: interest});
   renderAll();
   renderStaging();
   saveState();
