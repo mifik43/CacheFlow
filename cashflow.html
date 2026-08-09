@@ -360,10 +360,13 @@
   }
   .transition-modal h2 { margin: 0 0 12px 0; font-size: 22px; color: var(--accent); }
   .transition-modal p { color: var(--muted); margin: 0 0 20px 0; }
+  .cash-actions button { font-size: 13px; padding: 8px 12px; }
+  .cash-actions button:hover { border-color: var(--accent); }
   @media (max-width: 640px) {
     .game-banner { font-size: 13px; padding: 8px 12px; }
     .deal-card .deal-header { flex-direction: column; align-items: flex-start; }
     .win-modal, .transition-modal { padding: 24px 18px; }
+    .cash-actions button { width: 100%; }
   }
 </style>
 </head>
@@ -422,9 +425,19 @@
           <div class="value" id="cashflow">0 ₽</div>
         </div>
         <div class="metric">
+          <div class="name">Наличность</div>
+          <div class="value neutral" id="cash-on-hand">0 ₽</div>
+        </div>
+        <div class="metric">
           <div class="name">Чистые активы</div>
           <div class="value positive" id="net-worth">0 ₽</div>
         </div>
+      </div>
+      <div class="cash-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button id="collect-cashflow">💰 Получить денежный поток</button>
+        <button id="quit-job">🚪 Уволиться</button>
+        <button id="add-cash">➕ Добавить наличность</button>
+        <button id="remove-cash">➖ Удалить наличность</button>
       </div>
       <div class="bar-wrap">
         <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
@@ -698,13 +711,15 @@ const sectionMeta = {
 
 let gameMode = 'rat-race'; // 'rat-race' | 'fast-track'
 let fastTrackBaselinePassive = 0;
+let fastTrackMultiplier = 1;
 
 let committed = {
   income: [],
   expense: [],
   asset: [],
   liability: [],
-  passive: []
+  passive: [],
+  cashOnHand: 0
 };
 
 let pending = {
@@ -712,7 +727,8 @@ let pending = {
   expense: [],
   asset: [],
   liability: [],
-  passive: []
+  passive: [],
+  cashOnHand: 0
 };
 
 function cloneState(s) {
@@ -761,6 +777,42 @@ function syncLinked(sourceSection, removedName) {
     pending[linked].splice(idx, 1);
     renderSection(linked);
   }
+}
+
+function updateCashUI() {
+  document.getElementById('cash-on-hand').textContent = fmt(pending.cashOnHand);
+}
+
+function collectCashflow() {
+  const t = calculateFrom(pending);
+  pending.cashOnHand += t.cashflow;
+  updateCashUI();
+  renderStaging();
+}
+
+function quitJob() {
+  const t = calculateFrom(pending);
+  pending.cashOnHand -= t.totalExpense;
+  updateCashUI();
+  renderStaging();
+}
+
+function addCash() {
+  const raw = prompt('Введите сумму для добавления наличности:');
+  if (raw === null) return;
+  const num = Number(raw) || 0;
+  pending.cashOnHand += num;
+  updateCashUI();
+  renderStaging();
+}
+
+function removeCash() {
+  const raw = prompt('Введите сумму для удаления наличности:');
+  if (raw === null) return;
+  const num = Number(raw) || 0;
+  pending.cashOnHand -= num;
+  updateCashUI();
+  renderStaging();
 }
 
 function setGameMode(mode) {
@@ -866,14 +918,21 @@ function buyDeal(type, idx) {
 
 function escapeRatRace() {
   fastTrackBaselinePassive = pending.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
+  const t = calculateFrom(pending);
+  fastTrackMultiplier = 100;
+  pending.cashOnHand += t.cashflow * 100;
   setGameMode('fast-track');
   document.getElementById('transition-overlay').classList.remove('visible');
+  fastTrackMultiplier = 1;
+  updateCashUI();
+  renderStaging();
   checkEscape();
 }
 
 function restartGame() {
   gameMode = 'rat-race';
   fastTrackBaselinePassive = 0;
+  fastTrackMultiplier = 1;
   document.getElementById('win-overlay').classList.remove('visible');
   document.getElementById('transition-overlay').classList.remove('visible');
   reset();
@@ -899,9 +958,9 @@ function calculateFrom(state) {
   const totalPassive = state.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
   const totalAssets = state.asset.reduce((s,i)=>s+(Number(i.value)||0),0);
   const totalLiabilities = state.liability.reduce((s,i)=>s+(Number(i.value)||0),0);
-  const cashflow = totalIncome + totalPassive - totalExpense;
+  const cashflow = (totalIncome + totalPassive - totalExpense) * fastTrackMultiplier;
   const netWorth = totalAssets - totalLiabilities;
-  return { totalIncome, totalExpense, totalPassive, totalAssets, totalLiabilities, cashflow, netWorth };
+  return { totalIncome, totalExpense, totalPassive, totalAssets, totalLiabilities, cashflow, netWorth, cashOnHand: state.cashOnHand || 0 };
 }
 
 function updateSummary(state) {
@@ -913,6 +972,7 @@ function updateSummary(state) {
   cfEl.textContent = fmt(t.cashflow);
   cfEl.className = 'value ' + (t.cashflow > 0 ? 'positive' : t.cashflow < 0 ? 'negative' : 'neutral');
   document.getElementById('net-worth').textContent = fmt(t.netWorth);
+  document.getElementById('cash-on-hand').textContent = fmt(state.cashOnHand);
 
   const balance = t.totalIncome + t.totalPassive + t.totalExpense;
   const pct = balance > 0 ? Math.max(0, Math.min(100, ((t.totalIncome + t.totalPassive) / balance) * 100)) : 50;
@@ -981,7 +1041,8 @@ function computeDiff() {
     {key:'totalIncome', label:'Общий доход'},
     {key:'totalPassive', label:'Пассивный доход'},
     {key:'cashflow', label:'Денежный поток'},
-    {key:'netWorth', label:'Чистые активы'}
+    {key:'netWorth', label:'Чистые активы'},
+    {key:'cashOnHand', label:'Наличность'}
   ];
 
   for (const a of aggregates) {
@@ -1025,6 +1086,7 @@ function commit() {
 function revert() {
   pending = cloneState(committed);
   renderAll();
+  updateSummary(committed);
   renderStaging();
 }
 
@@ -1036,7 +1098,8 @@ function loadProfession(key) {
     expense: p.expense.map(i=>({...i})),
     asset: p.assets.map(i=>({...i})),
     liability: p.liabilities.map(i=>({...i})),
-    passive: p.passive ? p.passive.map(i=>({...i})) : []
+    passive: p.passive ? p.passive.map(i=>({...i})) : [],
+    cashOnHand: 0
   };
   committed = cloneState(base);
   pending = cloneState(base);
@@ -1046,18 +1109,21 @@ function loadProfession(key) {
   
   if (FAST_TRACK_PROFESSIONS[key]) {
     fastTrackBaselinePassive = pending.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
+    fastTrackMultiplier = 1;
     setGameMode('fast-track');
   } else if (gameMode === 'fast-track') {
+    fastTrackMultiplier = 1;
     setGameMode('rat-race');
   }
   checkEscape();
 }
 
 function reset() {
-  const empty = {income:[],expense:[],asset:[],liability:[],passive:[]};
+  const empty = {income:[],expense:[],asset:[],liability:[],passive:[],cashOnHand:0};
   committed = cloneState(empty);
   pending = cloneState(empty);
   fastTrackBaselinePassive = 0;
+  fastTrackMultiplier = 1;
   renderAll();
   updateSummary(committed);
   renderStaging();
@@ -1093,6 +1159,10 @@ document.getElementById('commit').addEventListener('click', commit);
 document.getElementById('revert').addEventListener('click', revert);
 document.getElementById('go-fast-track').addEventListener('click', escapeRatRace);
 document.getElementById('restart-game').addEventListener('click', restartGame);
+document.getElementById('collect-cashflow').addEventListener('click', collectCashflow);
+document.getElementById('quit-job').addEventListener('click', quitJob);
+document.getElementById('add-cash').addEventListener('click', addCash);
+document.getElementById('remove-cash').addEventListener('click', removeCash);
 
 loadProfession('engineer');
 setGameMode('rat-race');
