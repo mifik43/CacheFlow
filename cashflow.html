@@ -338,6 +338,36 @@
   }
   .win-modal h2 { margin: 0 0 12px 0; font-size: 24px; color: var(--green); }
   .win-modal p { color: var(--muted); margin: 0 0 20px 0; }
+  .buy-property-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.9);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .buy-property-overlay.visible { display: flex; }
+  .buy-property-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+  }
+  .buy-property-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
+  .buy-property-modal input {
+    width: 100%;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .buy-property-modal input:focus { outline: none; border-color: var(--accent); }
   .transition-overlay {
     display: none;
     position: fixed;
@@ -442,6 +472,7 @@
         <button id="add-cash">➕ Добавить наличность</button>
         <button id="remove-cash">➖ Удалить наличность</button>
         <button id="take-loan">🏦 Взять кредит</button>
+        <button id="buy-property">🏠 Купить недвижимость</button>
       </div>
       <div class="bar-wrap">
         <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
@@ -525,6 +556,22 @@
       <h2>🎉 Победа!</h2>
       <p>Пассивный доход увеличен на 50 000 ₽. Вы выиграли игру!</p>
       <button class="primary" id="restart-game">Начать заново</button>
+    </div>
+  </div>
+
+  <div id="buy-property-overlay" class="buy-property-overlay">
+    <div class="buy-property-modal">
+      <h2>🏠 Купить недвижимость</h2>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+        <input type="text" id="prop-name" placeholder="Название недвижимости" inputmode="text" />
+        <input type="number" id="prop-down" placeholder="Первый взнос (₽)" min="0" step="1" inputmode="numeric" />
+        <input type="number" id="prop-mortgage" placeholder="Ипотека (₽)" min="0" step="1" inputmode="numeric" />
+        <input type="number" id="prop-cashflow" placeholder="Денежный поток / мес (₽)" min="0" step="1" inputmode="numeric" />
+      </div>
+      <div class="actions" style="justify-content:center;">
+        <button class="primary" id="confirm-buy-property">Подтвердить покупку</button>
+        <button id="cancel-buy-property">Отмена</button>
+      </div>
     </div>
   </div>
 </div>
@@ -929,6 +976,57 @@ function takeLoan() {
   }
 }
 
+function buyProperty() {
+  const overlay = document.getElementById('buy-property-overlay');
+  const nameInput = document.getElementById('prop-name');
+  const downInput = document.getElementById('prop-down');
+  const mortgageInput = document.getElementById('prop-mortgage');
+  const cashflowInput = document.getElementById('prop-cashflow');
+  
+  nameInput.value = '';
+  downInput.value = '';
+  mortgageInput.value = '';
+  cashflowInput.value = '';
+  overlay.classList.add('visible');
+  nameInput.focus();
+}
+
+function confirmBuyProperty() {
+  const nameInput = document.getElementById('prop-name');
+  const downInput = document.getElementById('prop-down');
+  const mortgageInput = document.getElementById('prop-mortgage');
+  const cashflowInput = document.getElementById('prop-cashflow');
+  const overlay = document.getElementById('buy-property-overlay');
+  
+  const name = nameInput.value.trim();
+  const down = Math.max(0, Number(downInput.value) || 0);
+  const mortgage = Math.max(0, Number(mortgageInput.value) || 0);
+  const cashflow = Math.max(0, Number(cashflowInput.value) || 0);
+  
+  if (!name) { nameInput.focus(); return; }
+  if (down <= 0 && mortgage <= 0) { downInput.focus(); return; }
+  
+  if (pending.cashOnHand < down) {
+    alert('Недостаточно наличности для первого взноса.');
+    return;
+  }
+  
+  pending.liability.push({name: name, value: mortgage});
+  pending.passive.push({name: name + ' (доход)', value: cashflow});
+  pending.cashOnHand -= down;
+  
+  overlay.classList.remove('visible');
+  renderAll();
+  updateCashUI();
+  renderStaging();
+  saveState();
+  checkEscape();
+}
+
+function cancelBuyProperty() {
+  document.getElementById('buy-property-overlay').classList.remove('visible');
+}
+
 function setGameMode(mode) {
   gameMode = mode;
   const banner = document.getElementById('game-banner');
@@ -1285,6 +1383,9 @@ document.getElementById('quit-job').addEventListener('click', quitJob);
 document.getElementById('add-cash').addEventListener('click', addCash);
 document.getElementById('remove-cash').addEventListener('click', removeCash);
 document.getElementById('take-loan').addEventListener('click', takeLoan);
+document.getElementById('buy-property').addEventListener('click', buyProperty);
+document.getElementById('confirm-buy-property').addEventListener('click', confirmBuyProperty);
+document.getElementById('cancel-buy-property').addEventListener('click', cancelBuyProperty);
 
 if (!loadState()) {
   loadProfession('engineer');
