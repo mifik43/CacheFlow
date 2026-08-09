@@ -438,6 +438,7 @@
         <button id="quit-job">🚪 Уволиться</button>
         <button id="add-cash">➕ Добавить наличность</button>
         <button id="remove-cash">➖ Удалить наличность</button>
+        <button id="take-loan">🏦 Взять кредит</button>
       </div>
       <div class="bar-wrap">
         <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
@@ -815,6 +816,35 @@ function removeCash() {
   renderStaging();
 }
 
+function takeLoan() {
+  const raw = prompt('Введите сумму кредита:');
+  if (raw === null) return;
+  const amount = Math.max(0, Number(raw) || 0);
+  if (amount <= 0) return;
+  
+  const interest = Math.round(amount * 0.1);
+  const defaultName = `Кредит ${fmt(amount)}`;
+  const nameInput = prompt('Название кредита:', defaultName);
+  if (nameInput === null) return;
+  const loanName = nameInput.trim() || defaultName;
+  
+  const expenseName = `Проценты по ${loanName}`;
+  pending.liability.push({name: loanName, value: amount});
+  pending.expense.push({name: expenseName, value: interest});
+  renderAll();
+  renderStaging();
+  
+  const liabilityContainer = document.getElementById('liability-rows');
+  const lastLiability = liabilityContainer.lastElementChild;
+  if (lastLiability) {
+    const nameField = lastLiability.querySelector('.rname');
+    if (nameField) {
+      nameField.focus();
+      nameField.select();
+    }
+  }
+}
+
 function setGameMode(mode) {
   gameMode = mode;
   const banner = document.getElementById('game-banner');
@@ -1163,6 +1193,7 @@ document.getElementById('collect-cashflow').addEventListener('click', collectCas
 document.getElementById('quit-job').addEventListener('click', quitJob);
 document.getElementById('add-cash').addEventListener('click', addCash);
 document.getElementById('remove-cash').addEventListener('click', removeCash);
+document.getElementById('take-loan').addEventListener('click', takeLoan);
 
 loadProfession('engineer');
 setGameMode('rat-race');
