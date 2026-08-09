@@ -961,7 +961,9 @@ function takeLoan() {
   
   pending.liability.push({name: loanName, value: amount});
   pending.expense.push({name: loanName, value: interest});
+  pending.cashOnHand += amount;
   renderAll();
+  updateCashUI();
   renderStaging();
   saveState();
   
@@ -1005,11 +1007,6 @@ function confirmBuyProperty() {
   
   if (!name) { nameInput.focus(); return; }
   if (down <= 0 && mortgage <= 0) { downInput.focus(); return; }
-  
-  if (pending.cashOnHand < down) {
-    alert('Недостаточно наличности для первого взноса.');
-    return;
-  }
   
   pending.liability.push({name: name, value: mortgage});
   pending.passive.push({name: name + ' (доход)', value: cashflow});
@@ -1292,6 +1289,11 @@ function renderStaging() {
 }
 
 function commit() {
+  if (pending.cashOnHand < 0) {
+    alert('Невозможно подтвердить изменения: наличность не может быть отрицательной.');
+    renderStaging();
+    return;
+  }
   committed = cloneState(pending);
   updateSummary(committed);
   renderStaging();
