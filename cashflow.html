@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cashflow 101 — Калькулятор денежного потока</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --green: #4ade80;
+    --red: #f87171;
+    --amber: #fbbf24;
+    --border: #334155;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  h1 { margin: 0; font-size: 22px; letter-spacing: 0.3px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .profession {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  select, button {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 600; }
+  button.primary:hover { filter: brightness(1.05); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .col-12 { grid-column: span 12; }
+  .col-6  { grid-column: span 6; }
+  .col-4  { grid-column: span 4; }
+  .col-3  { grid-column: span 3; }
+  @media (max-width: 900px) {
+    .col-6, .col-4, .col-3 { grid-column: span 12; }
+  }
+
+  .card h2 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+  }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .row label { font-size: 14px; color: var(--muted); flex: 1; }
+  .row input[type="number"] {
+    width: 140px;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 14px;
+    text-align: right;
+  }
+  .row input[type="number"]:focus { outline: none; border-color: var(--accent); }
+
+  .summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .metric {
+    background: #0b1220;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    min-width: 180px;
+    flex: 1;
+  }
+  .metric .name { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .metric .value { font-size: 20px; font-weight: 700; margin-top: 4px; }
+  .value.positive { color: var(--green); }
+  .value.negative { color: var(--red); }
+  .value.neutral  { color: var(--amber); }
+
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+  .bar-wrap {
+    background: #0b1220;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .bar {
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--red), var(--amber), var(--green));
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .bar > i {
+    display: block;
+    height: 100%;
+    width: 50%;
+    background: rgba(255,255,255,0.25);
+    border-right: 2px solid #fff;
+  }
+
+  .category-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--accent);
+    background: transparent;
+    border: 1px dashed var(--border);
+    padding: 6px 10px;
+  }
+  .category-add:hover { border-color: var(--accent); color: var(--accent); }
+  .custom-row { animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>Cashflow 101</h1>
+      <div class="subtitle">Расчёт личного денежного потока</div>
+    </div>
+    <div class="profession">
+      <label for="profession" style="color:var(--muted);font-size:14px;">Профессия:</label>
+      <select id="profession">
+        <option value="custom">Свои данные</option>
+        <option value="engineer">Инженер</option>
+        <option value="doctor">Врач</option>
+        <option value="lawyer">Адвокат</option>
+        <option value="manager">Менеджер</option>
+        <option value="janitor">Уборщик</option>
+        <option value="pilot">Пилот</option>
+        <option value="teacher">Учитель</option>
+        <option value="police">Полицейский</option>
+        <option value="nurse">Медсестра</option>
+        <option value="mechanic">Механик</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card col-12">
+      <h2>Доходы (в месяц)</h2>
+      <div id="income-rows"></div>
+      <button class="category-add" data-section="income">+ Добавить доход</button>
+    </section>
+
+    <section class="card col-6">
+      <h2>Расходы (в месяц)</h2>
+      <div id="expense-rows"></div>
+      <button class="category-add" data-section="expense">+ Добавить расход</button>
+    </section>
+
+    <section class="card col-6">
+      <h2>Сбережения / Активы</h2>
+      <div id="asset-rows"></div>
+      <button class="category-add" data-section="asset">+ Добавить актив</button>
+    </section>
+
+    <section class="card col-6">
+      <h2>Пассивы (обязательства)</h2>
+      <div id="liability-rows"></div>
+      <button class="category-add" data-section="liability">+ Добавить пассив</button>
+    </section>
+
+    <section class="card col-6">
+      <h2>Пассивный доход (в месяц)</h2>
+      <div id="passive-rows"></div>
+      <button class="category-add" data-section="passive">+ Добавить источник пассивного дохода</button>
+    </section>
+
+    <section class="card col-12">
+      <h2>Итоги</h2>
+      <div class="summary">
+        <div class="metric">
+          <div class="name">Общий доход</div>
+          <div class="value neutral" id="total-income">0 ₽</div>
+        </div>
+        <div class="metric">
+          <div class="name">Общие расходы</div>
+          <div class="value negative" id="total-expenses">0 ₽</div>
+        </div>
+        <div class="metric">
+          <div class="name">Пассивный доход</div>
+          <div class="value positive" id="total-passive">0 ₽</div>
+        </div>
+        <div class="metric">
+          <div class="name">Денежный поток</div>
+          <div class="value" id="cashflow">0 ₽</div>
+        </div>
+        <div class="metric">
+          <div class="name">Чистые активы</div>
+          <div class="value positive" id="net-worth">0 ₽</div>
+        </div>
+      </div>
+      <div class="bar-wrap">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
+          <span>Расходы</span>
+          <span>Доходы + Пассив</span>
+        </div>
+        <div class="bar"><i id="balance-indicator"></i></div>
+        <div class="hint" id="status-text">Введите данные, чтобы увидеть расчёт</div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="reset">Сбросить</button>
+        <button id="export">Экспорт JSON</button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const PROFESSIONS = {
+  engineer: {
+    income: [{name:'Зарплата', value:5200},{name:'Премия', value:300}],
+    expense: [
+      {name:'Налоги', value:1200},{name:'Ипотека', value:1200},{name:'Автокредит', value:400},
+      {name:'Кредитные карты', value:200},{name:'Образование', value:200},
+      {name:'Продукты', value:600},{name:'Транспорт', value:300},
+      {name:'Развлечения', value:200},{name:'Коммунальные', value:150}
+    ],
+    assets: [{name:'Сбережения', value:1500},{name:'Акции', value:2000}],
+    liabilities: [{name:'Ипотека', value:120000},{name:'Автокредит', value:16000},{name:'Кредитные карты', value:3000}],
+    passive: []
+  },
+  doctor: {
+    income: [{name:'Зарплата', value:12000},{name:'Частная практика', value:4000}],
+    expense: [
+      {name:'Налоги', value:3500},{name:'Ипотека', value:2500},{name:'Автокредит', value:800},
+      {name:'Кредитные карты', value:600},{name:'Страховка', value:400},
+      {name:'Продукты', value:1000},{name:'Транспорт', value:600},
+      {name:'Развлечения', value:500},{name:'Коммунальные', value:400}
+    ],
+    assets: [{name:'Сбережения', value:3000},{name:'Акции', value:10000},{name:'Фонды', value:15000}],
+    liabilities: [{name:'Ипотека', value:300000},{name:'Автокредит', value:35000},{name:'Кредитные карты', value:8000}],
+    passive: [{name:'Инвестиции', value:800}]
+  },
+  lawyer: {
+    income: [{name:'Зарплата', value:10000},{name:'Частные дела', value:3000}],
+    expense: [
+      {name:'Налоги', value:3000},{name:'Ипотека', value:2000},{name:'Автокредит', value:500},
+      {name:'Кредитные карты', value:300},{name:'Образование', value:500},
+      {name:'Продукты', value:800},{name:'Транспорт', value:400},
+      {name:'Развлечения', value:400},{name:'Коммунальные', value:300}
+    ],
+    assets: [{name:'Сбережения', value:5000},{name:'Акции', value:8000},{name:'Фонды', value:12000}],
+    liabilities: [{name:'Ипотека', value:250000},{name:'Автокредит', value:30000}],
+    passive: [{name:'Дивиденды', value:600}]
+  },
+  manager: {
+    income: [{name:'Зарплата', value:7500},{name:'Бонусы', value:1000}],
+    expense: [
+      {name:'Налоги', value:2000},{name:'Ипотека', value:1500},{name:'Автокредит', value:350},
+      {name:'Кредитные карты', value:250},{name:'Образование', value:300},
+      {name:'Продукты', value:700},{name:'Транспорт', value:350},
+      {name:'Развлечения', value:300},{name:'Коммунальные', value:200}
+    ],
+    assets: [{name:'Сбережения', value:2000},{name:'Акции', value:5000}],
+    liabilities: [{name:'Ипотека', value:180000},{name:'Автокредит', value:20000},{name:'Кредитные карты', value:4000}],
+    passive: []
+  },
+  janitor: {
+    income: [{name:'Зарплата', value:2200}],
+    expense: [
+      {name:'Налоги', value:400},{name:'Аренда', value:600},{name:'Кредитные карты', value:150},
+      {name:'Продукты', value:500},{name:'Транспорт', value:150},
+      {name:'Развлечения', value:100},{name:'Коммунальные', value:120}
+    ],
+    assets: [{name:'Сбережения', value:300}],
+    liabilities: [{name:'Кредитные карты', value:1500}],
+    passive: []
+  },
+  pilot: {
+    income: [{name:'Зарплата', value:9500}],
+    expense: [
+      {name:'Налоги', value:2800},{name:'Ипотека', value:2200},{name:'Автокредит', value:600},
+      {name:'Кредитные карты', value:400},{name:'Страховка', value:500},
+      {name:'Продукты', value:800},{name:'Транспорт', value:500},
+      {name:'Развлечения', value:400},{name:'Коммунальные', value:300}
+    ],
+    assets: [{name:'Сбережения', value:4000},{name:'Акции', value:7000}],
+    liabilities: [{name:'Ипотека', value:260000},{name:'Автокредит', value:28000},{name:'Кредитные карты', value:5000}],
+    passive: [{name:'Инвестиции', value:500}]
+  },
+  teacher: {
+    income: [{name:'Зарплата', value:3500}],
+    expense: [
+      {name:'Налоги', value:800},{name:'Ипотека', value:900},{name:'Автокредит', value:250},
+      {name:'Кредитные карты', value:150},{name:'Образование', value:100},
+      {name:'Продукты', value:500},{name:'Транспорт', value:200},
+      {name:'Развлечения', value:150},{name:'Коммунальные', value:150}
+    ],
+    assets: [{name:'Сбережения', value:500},{name:'Фонды', value:1000}],
+    liabilities: [{name:'Ипотека', value:120000},{name:'Автокредит', value:12000}],
+    passive: []
+  },
+  police: {
+    income: [{name:'Зарплата', value:4200}],
+    expense: [
+      {name:'Налоги', value:1000},{name:'Ипотека', value:1000},{name:'Автокредит', value:300},
+      {name:'Кредитные карты', value:200},{name:'Страховка', value:200},
+      {name:'Продукты', value:600},{name:'Транспорт', value:250},
+      {name:'Развлечения', value:200},{name:'Коммунальные', value:180}
+    ],
+    assets: [{name:'Сбережения', value:800},{name:'Акции', value:2000}],
+    liabilities: [{name:'Ипотека', value:140000},{name:'Автокредит', value:15000}],
+    passive: []
+  },
+  nurse: {
+    income: [{name:'Зарплата', value:3800}],
+    expense: [
+      {name:'Налоги', value:900},{name:'Ипотека', value:850},{name:'Автокредит', value:280},
+      {name:'Кредитные карты', value:180},{name:'Страховка', value:150},
+      {name:'Продукты', value:550},{name:'Транспорт', value:220},
+      {name:'Развлечения', value:180},{name:'Коммунальные', value:160}
+    ],
+    assets: [{name:'Сбережения', value:600},{name:'Фонды', value:1500}],
+    liabilities: [{name:'Ипотека', value:130000},{name:'Автокредит', value:14000}],
+    passive: []
+  },
+  mechanic: {
+    income: [{name:'Зарплата', value:4000},{name:'Частная работа', value:800}],
+    expense: [
+      {name:'Налоги', value:1000},{name:'Ипотека', value:900},{name:'Автокредит', value:300},
+      {name:'Кредитные карты', value:200},{name:'Продукты', value:600},
+      {name:'Транспорт', value:250},{name:'Развлечения', value:200},{name:'Коммунальные', value:170}
+    ],
+    assets: [{name:'Сбережения', value:700},{name:'Акции', value:2500}],
+    liabilities: [{name:'Ипотека', value:140000},{name:'Автокредит', value:16000}],
+    passive: []
+  }
+};
+
+const sectionMeta = {
+  income:     {id:'income-rows',    label:'Доход',          currency:true, direction:'up'},
+  expense:    {id:'expense-rows',   label:'Расход',         currency:true, direction:'down'},
+  asset:      {id:'asset-rows',     label:'Актив',          currency:false, direction:'up'},
+  liability:  {id:'liability-rows', label:'Пассив',         currency:false, direction:'down'},
+  passive:    {id:'passive-rows',   label:'Пассивный доход', currency:true, direction:'up'}
+};
+
+let state = {
+  income: [],
+  expense: [],
+  asset: [],
+  liability: [],
+  passive: []
+};
+
+function fmt(n) {
+  const x = Number(n) || 0;
+  return x.toLocaleString('ru-RU') + ' ₽';
+}
+
+function rowHTML(name='', value='', isCurrency=false) {
+  return `<div class="row">
+    <input type="text" class="rname" placeholder="Название" value="${name}" />
+    <input type="number" class="rvalue" placeholder="0" value="${value}" min="0" step="1" />
+    <button class="remove" title="Удалить">✕</button>
+  </div>`;
+}
+
+function renderSection(section) {
+  const meta = sectionMeta[section];
+  const container = document.getElementById(meta.id);
+  container.innerHTML = state[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency)).join('');
+  container.querySelectorAll('.row').forEach((row, idx) => {
+    const item = state[section][idx];
+    row.querySelector('.rname').value = item.name;
+    row.querySelector('.rvalue').value = item.value;
+    row.querySelector('.rname').addEventListener('input', e => { item.name = e.target.value; calculate(); });
+    row.querySelector('.rvalue').addEventListener('input', e => { item.value = Number(e.target.value) || 0; calculate(); });
+    row.querySelector('.remove').addEventListener('click', () => { state[section].splice(idx, 1); renderSection(section); calculate(); });
+  });
+}
+
+function renderAll() {
+  Object.keys(sectionMeta).forEach(renderSection);
+}
+
+function addEmpty(section) {
+  state[section].push({name:'', value:0});
+  renderSection(section);
+  const meta = sectionMeta[section];
+  const last = document.getElementById(meta.id).lastElementChild;
+  if (last) last.querySelector('.rname').focus();
+}
+
+function calculate() {
+  const totalIncome = state.income.reduce((s,i)=>s+(Number(i.value)||0),0);
+  const totalExpense = state.expense.reduce((s,i)=>s+(Number(i.value)||0),0);
+  const totalPassive = state.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
+  const totalAssets = state.asset.reduce((s,i)=>s+(Number(i.value)||0),0);
+  const totalLiabilities = state.liability.reduce((s,i)=>s+(Number(i.value)||0),0);
+  const cashflow = totalIncome + totalPassive - totalExpense;
+  const netWorth = totalAssets - totalLiabilities;
+
+  document.getElementById('total-income').textContent = fmt(totalIncome);
+  document.getElementById('total-expenses').textContent = fmt(totalExpense);
+  document.getElementById('total-passive').textContent = fmt(totalPassive);
+  document.getElementById('cashflow').textContent = fmt(cashflow);
+  document.getElementById('net-worth').textContent = fmt(netWorth);
+
+  const cfEl = document.getElementById('cashflow');
+  cfEl.className = 'value ' + (cashflow > 0 ? 'positive' : cashflow < 0 ? 'negative' : 'neutral');
+
+  const balance = totalIncome + totalPassive + totalExpense;
+  const pct = balance > 0 ? Math.max(0, Math.min(100, ((totalIncome + totalPassive) / balance) * 100)) : 50;
+  document.getElementById('balance-indicator').style.width = pct + '%';
+
+  const status = document.getElementById('status-text');
+  if (cashflow > 0 && netWorth > 0) status.textContent = 'Отлично! Денежный поток положительный, активы превышают пассивы.';
+  else if (cashflow > 0) status.textContent = 'Денежный поток положительный, но пассивы превышают активы.';
+  else if (cashflow === 0) status.textContent = 'Денежный поток в нуле. Нужно оптимизировать расходы или увеличить доход.';
+  else status.textContent = 'Денежный поток отрицательный. Следует сократить расходы или увеличить доход.';
+}
+
+function loadProfession(key) {
+  const p = PROFESSIONS[key];
+  if (!p) return;
+  state.income = p.income.map(i=>({...i}));
+  state.expense = p.expense.map(i=>({...i}));
+  state.asset = p.assets.map(i=>({...i}));
+  state.liability = p.liabilities.map(i=>({...i}));
+  state.passive = p.passive ? p.passive.map(i=>({...i})) : [];
+  renderAll();
+  calculate();
+}
+
+function reset() {
+  state = {income:[],expense:[],asset:[],liability:[],passive:[]};
+  renderAll();
+  calculate();
+}
+
+function exportJSON() {
+  const data = {
+    date: new Date().toISOString(),
+    totals: {
+      income: state.income.reduce((s,i)=>s+(Number(i.value)||0),0),
+      expense: state.expense.reduce((s,i)=>s+(Number(i.value)||0),0),
+      passive: state.passive.reduce((s,i)=>s+(Number(i.value)||0),0),
+      assets: state.asset.reduce((s,i)=>s+(Number(i.value)||0),0),
+      liabilities: state.liability.reduce((s,i)=>s+(Number(i.value)||0),0)
+    },
+    cashflow: state.income.reduce((s,i)=>s+(Number(i.value)||0),0) + state.passive.reduce((s,i)=>s+(Number(i.value)||0),0) - state.expense.reduce((s,i)=>s+(Number(i.value)||0),0),
+    netWorth: state.asset.reduce((s,i)=>s+(Number(i.value)||0),0) - state.liability.reduce((s,i)=>s+(Number(i.value)||0),0),
+    details: state
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cashflow.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById('profession').addEventListener('change', e => {
+  if (e.target.value === 'custom') { reset(); return; }
+  loadProfession(e.target.value);
+});
+
+document.querySelectorAll('.category-add').forEach(btn => {
+  btn.addEventListener('click', () => addEmpty(btn.dataset.section));
+});
+
+document.getElementById('reset').addEventListener('click', reset);
+document.getElementById('export').addEventListener('click', exportJSON);
+
+loadProfession('engineer');
+</script>
+</body>
+</html>
