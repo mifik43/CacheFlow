@@ -654,8 +654,8 @@
       <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
         <input type="text" id="stock-name" placeholder="Название компании" inputmode="text" />
         <input type="number" id="stock-price" placeholder="Цена за акцию (₽)" min="0" step="1" inputmode="numeric" />
-        <input type="number" id="stock-count" placeholder="Количество акций" min="0" step="1" inputmode="numeric" />
-        <input type="text" id="stock-total" placeholder="Итоговая сумма (₽)" readonly inputmode="numeric" />
+         <input type="number" id="stock-count" placeholder="Количество акций" step="1" inputmode="numeric" />
+         <input type="number" id="stock-total" placeholder="Сумма (₽)" step="1" inputmode="numeric" />
       </div>
       <div class="total-row">
         <span>Итоговая сумма:</span>
@@ -674,8 +674,8 @@
       <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
         <input type="text" id="sell-stock-name" placeholder="Название компании" inputmode="text" />
         <input type="number" id="sell-stock-price" placeholder="Цена за акцию (₽)" min="0" step="1" inputmode="numeric" />
-        <input type="number" id="sell-stock-count" placeholder="Количество для продажи" min="0" step="1" inputmode="numeric" />
-        <input type="text" id="sell-stock-total" placeholder="Итоговая сумма продажи (₽)" readonly inputmode="numeric" />
+         <input type="number" id="sell-stock-count" placeholder="Количество для продажи" step="1" inputmode="numeric" />
+         <input type="number" id="sell-stock-total" placeholder="Сумма продажи (₽)" step="1" inputmode="numeric" />
       </div>
       <div class="total-row">
         <span>Итоговая сумма продажи:</span>
@@ -1202,35 +1202,61 @@ function cancelBuyProperty() {
 function updateStockFormTotal() {
   const price = Math.max(0, Number(document.getElementById('stock-price').value) || 0);
   const count = Math.max(0, Number(document.getElementById('stock-count').value) || 0);
-  const total = price * count;
-  document.getElementById('stock-total').value = total;
-  document.getElementById('stock-total-display').textContent = fmt(total);
+  const totalField = document.getElementById('stock-total');
+  const totalDisplay = document.getElementById('stock-total-display');
+  const active = document.activeElement;
+
+  if (active && active.id === 'stock-count') {
+    const newTotal = price * count;
+    totalField.value = newTotal;
+    totalDisplay.textContent = fmt(newTotal);
+  } else if (active && active.id === 'stock-total') {
+    const total = Math.max(0, Number(totalField.value) || 0);
+    const newCount = price > 0 ? Math.floor(total / price) : 0;
+    document.getElementById('stock-count').value = newCount;
+    totalDisplay.textContent = fmt(total);
+  } else if (active && active.id === 'stock-price') {
+    if (count > 0) {
+      const newTotal = price * count;
+      totalField.value = newTotal;
+      totalDisplay.textContent = fmt(newTotal);
+    } else {
+      const total = Math.max(0, Number(totalField.value) || 0);
+      const newCount = price > 0 ? Math.floor(total / price) : 0;
+      document.getElementById('stock-count').value = newCount;
+    }
+  } else {
+    totalDisplay.textContent = fmt(price * count);
+  }
 }
 
 function confirmBuyStocks() {
   const nameInput = document.getElementById('stock-name');
   const priceInput = document.getElementById('stock-price');
   const countInput = document.getElementById('stock-count');
+  const totalInput = document.getElementById('stock-total');
   const overlay = document.getElementById('buy-stocks-overlay');
 
   const name = nameInput.value.trim();
   const price = Math.max(0, Number(priceInput.value) || 0);
   const count = Math.max(0, Number(countInput.value) || 0);
-  const total = price * count;
+  const total = Math.max(0, Number(totalInput.value) || 0);
+  const finalCount = count > 0 ? count : (price > 0 ? Math.floor(total / price) : 0);
+  const finalTotal = price * finalCount;
 
   if (!name) { nameInput.focus(); return; }
   if (price <= 0) { priceInput.focus(); return; }
-  if (count <= 0) { countInput.focus(); return; }
+  if (finalCount <= 0) { countInput.focus(); return; }
 
   const existingIdx = pending.stocks.findIndex(s => s.name === name);
   if (existingIdx >= 0) {
-    pending.stocks[existingIdx].count = (Number(pending.stocks[existingIdx].count) || 0) + count;
+    pending.stocks[existingIdx].count = (Number(pending.stocks[existingIdx].count) || 0) + finalCount;
     pending.stocks[existingIdx].price = price;
   } else {
-    pending.stocks.push({name, price, count});
+    pending.stocks.push({name, price, count: finalCount});
   }
 
-  pending.cashOnHand -= total;
+  pending.cashOnHand -= finalTotal;
 
   overlay.classList.remove('visible');
   renderAll();
@@ -1262,37 +1288,65 @@ function openSellStocks(idx) {
 function updateSellFormTotal() {
   const price = Math.max(0, Number(document.getElementById('sell-stock-price').value) || 0);
   const count = Math.max(0, Number(document.getElementById('sell-stock-count').value) || 0);
-  const total = price * count;
-  document.getElementById('sell-stock-total').value = total;
-  document.getElementById('sell-stock-total-display').textContent = fmt(total);
+  const totalField = document.getElementById('sell-stock-total');
+  const totalDisplay = document.getElementById('sell-stock-total-display');
+  const active = document.activeElement;
+
+  if (active && active.id === 'sell-stock-count') {
+    const newTotal = price * count;
+    totalField.value = newTotal;
+    totalDisplay.textContent = fmt(newTotal);
+  } else if (active && active.id === 'sell-stock-total') {
+    const total = Math.max(0, Number(totalField.value) || 0);
+    const newCount = price > 0 ? Math.floor(total / price) : 0;
+    document.getElementById('sell-stock-count').value = newCount;
+    totalDisplay.textContent = fmt(total);
+  } else if (active && active.id === 'sell-stock-price') {
+    if (count > 0) {
+      const newTotal = price * count;
+      totalField.value = newTotal;
+      totalDisplay.textContent = fmt(newTotal);
+    } else {
+      const total = Math.max(0, Number(totalField.value) || 0);
+      const newCount = price > 0 ? Math.floor(total / price) : 0;
+      document.getElementById('sell-stock-count').value = newCount;
+    }
+  } else {
+    const total = price * count;
+    totalField.value = total;
+    totalDisplay.textContent = fmt(total);
+  }
 }
 
 function confirmSellStocks() {
   const nameInput = document.getElementById('sell-stock-name');
   const priceInput = document.getElementById('sell-stock-price');
   const countInput = document.getElementById('sell-stock-count');
+  const totalInput = document.getElementById('sell-stock-total');
   const overlay = document.getElementById('sell-stocks-overlay');
 
   const name = nameInput.value.trim();
   const price = Math.max(0, Number(priceInput.value) || 0);
   const count = Math.max(0, Number(countInput.value) || 0);
-  const total = price * count;
+  const total = Math.max(0, Number(totalInput.value) || 0);
+  const finalCount = count > 0 ? count : (price > 0 ? Math.floor(total / price) : 0);
+  const finalTotal = price * finalCount;
 
   if (!name) { nameInput.focus(); return; }
   if (price <= 0) { priceInput.focus(); return; }
-  if (count <= 0) { countInput.focus(); return; }
+  if (finalCount <= 0) { countInput.focus(); return; }
 
   if (sellStockIndex >= 0 && sellStockIndex < pending.stocks.length) {
     const stock = pending.stocks[sellStockIndex];
     const currentCount = Number(stock.count) || 0;
-    if (count >= currentCount) {
+    if (finalCount >= currentCount) {
       pending.stocks.splice(sellStockIndex, 1);
     } else {
-      stock.count = currentCount - count;
+      stock.count = currentCount - finalCount;
     }
   }
 
-  pending.cashOnHand += total;
+  pending.cashOnHand += finalTotal;
 
   overlay.classList.remove('visible');
   renderAll();
@@ -1713,10 +1767,12 @@ document.getElementById('confirm-buy-stocks').addEventListener('click', confirmB
 document.getElementById('cancel-buy-stocks').addEventListener('click', cancelBuyStocks);
 document.getElementById('stock-price').addEventListener('input', updateStockFormTotal);
 document.getElementById('stock-count').addEventListener('input', updateStockFormTotal);
+document.getElementById('stock-total').addEventListener('input', updateStockFormTotal);
 document.getElementById('confirm-sell-stocks').addEventListener('click', confirmSellStocks);
 document.getElementById('cancel-sell-stocks').addEventListener('click', cancelSellStocks);
 document.getElementById('sell-stock-price').addEventListener('input', updateSellFormTotal);
 document.getElementById('sell-stock-count').addEventListener('input', updateSellFormTotal);
+document.getElementById('sell-stock-total').addEventListener('input', updateSellFormTotal);
 
 if (!loadState()) {
   loadProfession('engineer');
