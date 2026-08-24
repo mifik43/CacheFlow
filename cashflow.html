@@ -555,6 +555,71 @@
   .stock-row .stock-sell { flex: 0 0 auto; padding: 6px 10px; font-size: 12px; background: var(--green); color: #0f172a; border-color: var(--green); font-weight: 600; }
   .row .sell-asset { flex: 0 0 auto; padding: 6px 10px; font-size: 12px; background: var(--green); color: #0f172a; border-color: var(--green); font-weight: 600; }
   .buy-property-modal input:focus { outline: none; border-color: var(--accent); }
+  .sell-property-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.9);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .sell-property-overlay.visible { display: flex; }
+  .sell-property-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+  }
+  .sell-property-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
+  .sell-property-modal input {
+    width: 100%;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .sell-property-modal input:focus { outline: none; border-color: var(--accent); }
+  .sell-property-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
+  .sell-property-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
+  .sell-property-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .settings-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.9);
+    z-index: 1002;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .settings-overlay.visible { display: flex; }
+  .settings-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+  }
+  .settings-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
+  .settings-modal label { font-size: 14px; color: var(--muted); display: block; margin-bottom: 6px; }
+  .settings-modal input {
+    width: 100%;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .settings-modal input:focus { outline: none; border-color: var(--accent); }
   .transition-overlay {
     display: none;
     position: fixed;
@@ -619,6 +684,7 @@
           <option value="developer">Разработчик</option>
         </optgroup>
       </select>
+      <button id="settings-btn" style="margin-left:8px;">⚙️ Настройки</button>
     </div>
   </header>
   <div id="game-banner" class="game-banner rat-race">Крысиные бега: пассивный доход должен превысить расходы для побега</div>
@@ -658,7 +724,6 @@
         <button id="quit-job">🚪 Уволиться</button>
         <button id="add-cash">➕ Добавить наличность</button>
         <button id="remove-cash">➖ Удалить наличность</button>
-        <button id="buy-property">🏠 Купить недвижимость</button>
       </div>
       <div class="bar-wrap">
         <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
@@ -702,6 +767,12 @@
       <h2>Акции</h2>
       <div id="stocks-rows"></div>
       <button class="category-add" data-section="stocks">+ Купить акции</button>
+    </section>
+
+    <section class="card col-6">
+      <h2>Недвижимость</h2>
+      <div id="property-rows"></div>
+      <button class="category-add" data-section="property">+ Купить недвижимость</button>
     </section>
 
     <section class="card col-6">
@@ -754,11 +825,45 @@
         <input type="text" id="prop-name" placeholder="Название недвижимости" inputmode="text" />
         <input type="number" id="prop-down" placeholder="Первый взнос (₽)" min="0" step="1" inputmode="numeric" />
         <input type="number" id="prop-mortgage" placeholder="Ипотека (₽)" min="0" step="1" inputmode="numeric" />
-         <input type="number" id="prop-cashflow" placeholder="Денежный поток / мес (₽)" step="1" inputmode="numeric" />
+        <input type="number" id="prop-cashflow" placeholder="Денежный поток / мес (₽)" step="1" inputmode="numeric" />
       </div>
       <div class="actions" style="justify-content:center;">
         <button class="primary" id="confirm-buy-property">Подтвердить покупку</button>
         <button id="cancel-buy-property">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sell-property-overlay" class="sell-property-overlay">
+    <div class="sell-property-modal">
+      <h2>🏠 Продать недвижимость</h2>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+        <input type="text" id="sell-prop-name" placeholder="Название недвижимости" inputmode="text" disabled />
+        <input type="number" id="sell-prop-price" placeholder="Стоимость продажи (₽)" min="0" step="1" inputmode="numeric" />
+      </div>
+      <div class="total-row">
+        <span>Наличные после продажи (с учетом ипотеки):</span>
+        <span class="total-value" id="sell-prop-total-display">0 ₽</span>
+      </div>
+      <div class="actions" style="justify-content:center;">
+        <button class="primary" id="confirm-sell-property">Подтвердить продажу</button>
+        <button id="cancel-sell-property">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settings-overlay" class="settings-overlay">
+    <div class="settings-modal">
+      <h2>⚙️ Настройки игры</h2>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+        <label>Процент кредита (ежемесячный платёж)<br/><span style="font-size:12px;color:var(--muted)">Например: 10 означает 10% от суммы кредита в месяц</span></label>
+        <input type="number" id="setting-loan-rate" placeholder="%" min="0" step="1" inputmode="numeric" />
+        <label>Процент ипотеки (ежемесячный платёж)<br/><span style="font-size:12px;color:var(--muted)">Например: 0 означает без процентов</span></label>
+        <input type="number" id="setting-mortgage-rate" placeholder="%" min="0" step="1" inputmode="numeric" />
+      </div>
+      <div class="actions" style="justify-content:center;">
+        <button class="primary" id="confirm-settings">Сохранить</button>
+        <button id="cancel-settings">Отмена</button>
       </div>
     </div>
   </div>
@@ -1059,12 +1164,15 @@ const sectionMeta = {
   asset:      {id:'asset-rows',      label:'Актив',          currency:false, direction:'up'},
   liability:  {id:'liability-rows',  label:'Пассив',         currency:false, direction:'down'},
   passive:    {id:'passive-rows',    label:'Пассивный доход', currency:true, direction:'up'},
-  stocks:     {id:'stocks-rows',     label:'Акции',          currency:false, direction:'up'}
+  stocks:     {id:'stocks-rows',     label:'Акции',          currency:false, direction:'up'},
+  property:   {id:'property-rows',   label:'Недвижимость',   currency:false, direction:'down'}
 };
 
 let gameMode = 'rat-race'; // 'rat-race' | 'fast-track'
 let fastTrackBaselinePassive = 0;
 let fastTrackMultiplier = 1;
+let loanInterestRate = 10;
+let mortgageInterestRate = 0;
 
 let committed = {
   income: [],
@@ -1073,6 +1181,7 @@ let committed = {
   liability: [],
   passive: [],
   stocks: [],
+  property: [],
   cashOnHand: 0
 };
 
@@ -1083,6 +1192,7 @@ let pending = {
   liability: [],
   passive: [],
   stocks: [],
+  property: [],
   cashOnHand: 0
 };
 
@@ -1092,7 +1202,9 @@ function saveState() {
     pending,
     gameMode,
     fastTrackBaselinePassive,
-    fastTrackMultiplier
+    fastTrackMultiplier,
+    loanInterestRate,
+    mortgageInterestRate
   };
   localStorage.setItem('cashflow-state', JSON.stringify(data));
 }
@@ -1102,13 +1214,17 @@ function loadState() {
   if (!raw) return false;
   try {
     const data = JSON.parse(raw);
-    committed = data.committed || {income:[],expense:[],asset:[],liability:[],passive:[],stocks:[],cashOnHand:0};
-    pending = data.pending || {income:[],expense:[],asset:[],liability:[],passive:[],stocks:[],cashOnHand:0};
+    committed = data.committed || {income:[],expense:[],asset:[],liability:[],passive:[],stocks:[],property:[],cashOnHand:0};
+    pending = data.pending || {income:[],expense:[],asset:[],liability:[],passive:[],stocks:[],property:[],cashOnHand:0};
     gameMode = data.gameMode || 'rat-race';
     fastTrackBaselinePassive = data.fastTrackBaselinePassive || 0;
     fastTrackMultiplier = data.fastTrackMultiplier || 1;
+    loanInterestRate = data.loanInterestRate ?? 10;
+    mortgageInterestRate = data.mortgageInterestRate ?? 0;
     if (!committed.stocks) committed.stocks = [];
     if (!pending.stocks) pending.stocks = [];
+    if (!committed.property) committed.property = [];
+    if (!pending.property) pending.property = [];
     return true;
   } catch(e) {
     return false;
@@ -1360,7 +1476,7 @@ function confirmTakeLoan() {
   
   const name = nameInput.value.trim();
   const amount = Math.max(0, Number(amountInput.value) || 0);
-  const payment = Number(paymentInput.value) || 0;
+  const payment = Math.round(amount * (loanInterestRate / 100));
   
   if (!name) { nameInput.focus(); return; }
   if (amount <= 0) { amountInput.focus(); return; }
@@ -1369,7 +1485,9 @@ function confirmTakeLoan() {
   const loanName = name || defaultName;
   
   pending.liability.push({name: loanName, value: amount, payment: payment});
-  syncLiabilityExpense(pending.liability[pending.liability.length - 1]);
+  if (payment > 0) {
+    syncLiabilityExpense(pending.liability[pending.liability.length - 1]);
+  }
   pending.cashOnHand += amount;
   
   overlay.classList.remove('visible');
@@ -1503,6 +1621,104 @@ function cancelSellAsset() {
   sellAssetIndex = -1;
 }
 
+function renderProperties() {
+  const container = document.getElementById('property-rows');
+  container.innerHTML = pending.property.map((prop, idx) => {
+    return `<div class="stock-row">
+      <div class="stock-name">${prop.name}</div>
+      <div class="stock-price">${fmt(Number(prop.down) || 0)}</div>
+      <div class="stock-count">${fmt(Number(prop.mortgage) || 0)}</div>
+      <div class="stock-total">${fmt(Number(prop.cashflow) || 0)}</div>
+      <button class="stock-sell" title="Продать" aria-label="Продать">Продать</button>
+    </div>`;
+  }).join('');
+
+  container.querySelectorAll('.stock-row').forEach((row, idx) => {
+    row.querySelector('.stock-sell').addEventListener('click', () => openSellProperty(idx));
+  });
+}
+
+let sellPropertyIndex = -1;
+
+function openSellProperty(idx) {
+  sellPropertyIndex = idx;
+  const prop = pending.property[idx];
+  if (!prop) return;
+  const overlay = document.getElementById('sell-property-overlay');
+  document.getElementById('sell-prop-name').value = prop.name;
+  document.getElementById('sell-prop-price').value = '';
+  document.getElementById('sell-prop-total-display').textContent = '0 ₽';
+  overlay.classList.add('visible');
+  document.getElementById('sell-prop-price').focus();
+}
+
+function updateSellPropertyFormTotal() {
+  const price = Math.max(0, Number(document.getElementById('sell-prop-price').value) || 0);
+  const mortgage = sellPropertyIndex >= 0 && sellPropertyIndex < pending.property.length ? (Number(pending.property[sellPropertyIndex].mortgage) || 0) : 0;
+  document.getElementById('sell-prop-total-display').textContent = fmt(price - mortgage);
+}
+
+function confirmSellProperty() {
+  const priceInput = document.getElementById('sell-prop-price');
+  const overlay = document.getElementById('sell-property-overlay');
+  const salePrice = Math.max(0, Number(priceInput.value) || 0);
+
+  if (sellPropertyIndex >= 0 && sellPropertyIndex < pending.property.length) {
+    const prop = pending.property[sellPropertyIndex];
+    const mortgage = Number(prop.mortgage) || 0;
+    pending.cashOnHand += salePrice - mortgage;
+
+    const liabilityIdx = pending.liability.findIndex(l => l.name === prop.name);
+    if (liabilityIdx !== -1) {
+      pending.liability.splice(liabilityIdx, 1);
+    }
+    const expenseIdx = pending.expense.findIndex(e => e.name === prop.name);
+    if (expenseIdx !== -1) {
+      pending.expense.splice(expenseIdx, 1);
+    }
+
+    const passiveIdx = pending.passive.findIndex(p => p.name === prop.name);
+    if (passiveIdx !== -1) {
+      pending.passive.splice(passiveIdx, 1);
+    }
+
+    pending.property.splice(sellPropertyIndex, 1);
+  }
+
+  overlay.classList.remove('visible');
+  renderAll();
+  updateCashUI();
+  renderStaging();
+  saveState();
+  checkEscape();
+  sellPropertyIndex = -1;
+}
+
+function cancelSellProperty() {
+  document.getElementById('sell-property-overlay').classList.remove('visible');
+  sellPropertyIndex = -1;
+}
+
+function openSettings() {
+  const overlay = document.getElementById('settings-overlay');
+  document.getElementById('setting-loan-rate').value = loanInterestRate;
+  document.getElementById('setting-mortgage-rate').value = mortgageInterestRate;
+  overlay.classList.add('visible');
+}
+
+function confirmSettings() {
+  const loanRate = Math.max(0, Number(document.getElementById('setting-loan-rate').value) || 0);
+  const mortgageRate = Math.max(0, Number(document.getElementById('setting-mortgage-rate').value) || 0);
+  loanInterestRate = loanRate;
+  mortgageInterestRate = mortgageRate;
+  document.getElementById('settings-overlay').classList.remove('visible');
+  saveState();
+}
+
+function cancelSettings() {
+  document.getElementById('settings-overlay').classList.remove('visible');
+}
+
 function buyProperty() {
   const overlay = document.getElementById('buy-property-overlay');
   const nameInput = document.getElementById('prop-name');
@@ -1559,9 +1775,15 @@ function confirmBuyProperty() {
   
   if (!name) { nameInput.focus(); return; }
   if (down <= 0 && mortgage <= 0) { downInput.focus(); return; }
+  if (pending.property.some(p => p.name === name)) { nameInput.focus(); return; }
   
-  pending.liability.push({name: name, value: mortgage});
-  pending.passive.push({name: name + ' (доход)', value: cashflow});
+  const payment = Math.round(mortgage * (mortgageInterestRate / 100));
+  pending.property.push({name, down, mortgage, cashflow});
+  pending.liability.push({name, value: mortgage, payment: payment});
+  if (payment > 0) {
+    syncLiabilityExpense(pending.liability[pending.liability.length - 1]);
+  }
+  pending.passive.push({name, value: cashflow});
   pending.cashOnHand -= down;
   
   overlay.classList.remove('visible');
@@ -1871,6 +2093,7 @@ function restartGame() {
 function renderAll() {
   Object.keys(sectionMeta).forEach(section => {
     if (section === 'stocks') renderStocks();
+    else if (section === 'property') renderProperties();
     else renderSection(section);
   });
 }
@@ -1884,6 +2107,9 @@ function addEmpty(section) {
     return;
   } else if (section === 'asset') {
     buyAssetModal();
+    return;
+  } else if (section === 'property') {
+    buyProperty();
     return;
   } else {
     pending[section].push({name:'', value:0});
@@ -1902,7 +2128,7 @@ function calculateFrom(state) {
   const totalPassive = state.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
   const totalIncome = state.income.reduce((s,i)=>s+(Number(i.value)||0),0) + totalPassive;
   const totalExpense = state.expense.reduce((s,i)=>s+(Number(i.value)||0),0);
-  const totalAssets = state.asset.reduce((s,i)=>s+(Number(i.value)||0),0);
+  const totalAssets = state.asset.reduce((s,i)=>s+(Number(i.value)||0),0) + state.property.reduce((s,i)=>s+(Number(i.down)||0)+(Number(i.mortgage)||0),0);
   const totalLiabilities = state.liability.reduce((s,i)=>s+(Number(i.value)||0),0);
   const cashflow = (totalIncome - totalExpense) * fastTrackMultiplier;
   const netWorth = totalAssets - totalLiabilities;
@@ -1938,6 +2164,7 @@ function computeDiff() {
   const sections = Object.keys(sectionMeta);
 
   for (const section of sections) {
+    if (section === 'property') continue;
     const committedItems = committed[section];
     const pendingItems = pending[section];
 
@@ -2038,6 +2265,48 @@ function computeDiff() {
     }
   }
 
+  const committedProperties = committed.property || [];
+  const pendingProperties = pending.property || [];
+  const cUsedProps = new Array(committedProperties.length).fill(false);
+  const pUsedProps = new Array(pendingProperties.length).fill(false);
+
+  for (let pi = 0; pi < pendingProperties.length; pi++) {
+    for (let ci = 0; ci < committedProperties.length; ci++) {
+      if (!cUsedProps[ci] && !pUsedProps[pi] && committedProperties[ci].name === pendingProperties[pi].name &&
+          (Number(committedProperties[ci].down)||0) === (Number(pendingProperties[pi].down)||0) &&
+          (Number(committedProperties[ci].mortgage)||0) === (Number(pendingProperties[pi].mortgage)||0) &&
+          (Number(committedProperties[ci].cashflow)||0) === (Number(pendingProperties[pi].cashflow)||0)) {
+        cUsedProps[ci] = true;
+        pUsedProps[pi] = true;
+        break;
+      }
+    }
+  }
+
+  for (let pi = 0; pi < pendingProperties.length; pi++) {
+    if (pUsedProps[pi]) continue;
+    for (let ci = 0; ci < committedProperties.length; ci++) {
+      if (!cUsedProps[ci] && !pUsedProps[pi] && committedProperties[ci].name === pendingProperties[pi].name) {
+        cUsedProps[ci] = true;
+        pUsedProps[pi] = true;
+        diffs.push({type:'modified', section:'property', text: `~ ${committedProperties[ci].name}: перв.взнос ${fmt(committedProperties[ci].down)} → ${fmt(pendingProperties[pi].down)}, ипотека ${fmt(committedProperties[ci].mortgage)} → ${fmt(pendingProperties[pi].mortgage)}, доход ${fmt(committedProperties[ci].cashflow)} → ${fmt(pendingProperties[pi].cashflow)}`});
+        break;
+      }
+    }
+  }
+
+  for (let ci = 0; ci < committedProperties.length; ci++) {
+    if (!cUsedProps[ci]) {
+      diffs.push({type:'removed', section:'property', text: `- ${committedProperties[ci].name || '(без названия)'}`});
+    }
+  }
+
+  for (let pi = 0; pi < pendingProperties.length; pi++) {
+    if (!pUsedProps[pi]) {
+      diffs.push({type:'added', section:'property', text: `+ ${pendingProperties[pi].name || '(без названия)'}`});
+    }
+  }
+
   return diffs;
 }
 
@@ -2094,6 +2363,7 @@ function loadProfession(key) {
     liability: p.liabilities.map(i=>({...i})),
     passive: p.passive ? p.passive.map(i=>({...i})) : [],
     stocks: [],
+    property: [],
     cashOnHand: 0
   };
   committed = cloneState(base);
@@ -2116,11 +2386,13 @@ function loadProfession(key) {
 }
 
 function reset() {
-  const empty = {income:[],expense:[],asset:[],liability:[],passive:[],stocks:[],cashOnHand:0};
+  const empty = {income:[],expense:[],asset:[],liability:[],passive:[],stocks:[],property:[],cashOnHand:0};
   committed = cloneState(empty);
   pending = cloneState(empty);
   fastTrackBaselinePassive = 0;
   fastTrackMultiplier = 1;
+  loanInterestRate = 10;
+  mortgageInterestRate = 0;
   renderAll();
   updateSummary(committed);
   renderStaging();
@@ -2150,7 +2422,6 @@ document.getElementById('collect-cashflow').addEventListener('click', collectCas
 document.getElementById('quit-job').addEventListener('click', quitJob);
 document.getElementById('add-cash').addEventListener('click', addCash);
 document.getElementById('remove-cash').addEventListener('click', removeCash);
-document.getElementById('buy-property').addEventListener('click', buyProperty);
 document.getElementById('confirm-buy-property').addEventListener('click', confirmBuyProperty);
 document.getElementById('cancel-buy-property').addEventListener('click', cancelBuyProperty);
 document.getElementById('confirm-buy-stocks').addEventListener('click', confirmBuyStocks);
@@ -2170,12 +2441,19 @@ document.getElementById('asset-price').addEventListener('input', updateAssetForm
 document.getElementById('confirm-sell-asset').addEventListener('click', confirmSellAsset);
 document.getElementById('cancel-sell-asset').addEventListener('click', cancelSellAsset);
 document.getElementById('sell-asset-price').addEventListener('input', updateSellAssetFormTotal);
+document.getElementById('confirm-sell-property').addEventListener('click', confirmSellProperty);
+document.getElementById('cancel-sell-property').addEventListener('click', cancelSellProperty);
+document.getElementById('sell-prop-price').addEventListener('input', updateSellPropertyFormTotal);
 
 document.getElementById('loan-amount').addEventListener('input', e => {
   const amount = Math.max(0, Number(e.target.value) || 0);
-  const payment = Math.round(amount * 0.1);
+  const payment = Math.round(amount * (loanInterestRate / 100));
   document.getElementById('loan-payment').value = payment;
 });
+
+document.getElementById('settings-btn').addEventListener('click', openSettings);
+document.getElementById('confirm-settings').addEventListener('click', confirmSettings);
+document.getElementById('cancel-settings').addEventListener('click', cancelSettings);
 
 document.getElementById('confirm-take-loan').addEventListener('click', confirmTakeLoan);
 document.getElementById('cancel-take-loan').addEventListener('click', cancelTakeLoan);
