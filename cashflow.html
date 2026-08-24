@@ -1460,12 +1460,12 @@ function addEmpty(section) {
 }
 
 function calculateFrom(state) {
-  const totalIncome = state.income.reduce((s,i)=>s+(Number(i.value)||0),0);
-  const totalExpense = state.expense.reduce((s,i)=>s+(Number(i.value)||0),0);
   const totalPassive = state.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
+  const totalIncome = state.income.reduce((s,i)=>s+(Number(i.value)||0),0) + totalPassive;
+  const totalExpense = state.expense.reduce((s,i)=>s+(Number(i.value)||0),0);
   const totalAssets = state.asset.reduce((s,i)=>s+(Number(i.value)||0),0);
   const totalLiabilities = state.liability.reduce((s,i)=>s+(Number(i.value)||0),0);
-  const cashflow = (totalIncome + totalPassive - totalExpense) * fastTrackMultiplier;
+  const cashflow = (totalIncome - totalExpense) * fastTrackMultiplier;
   const netWorth = totalAssets - totalLiabilities;
   return { totalIncome, totalExpense, totalPassive, totalAssets, totalLiabilities, cashflow, netWorth, cashOnHand: state.cashOnHand || 0 };
 }
@@ -1481,8 +1481,8 @@ function updateSummary(state) {
   document.getElementById('net-worth').textContent = fmt(t.netWorth);
   document.getElementById('cash-on-hand').textContent = fmt(state.cashOnHand);
 
-  const balance = t.totalIncome + t.totalPassive + t.totalExpense;
-  const pct = balance > 0 ? Math.max(0, Math.min(100, ((t.totalIncome + t.totalPassive) / balance) * 100)) : 50;
+  const balance = t.totalIncome + t.totalExpense;
+  const pct = balance > 0 ? Math.max(0, Math.min(100, (t.totalIncome / balance) * 100)) : 50;
   document.getElementById('balance-indicator').style.width = pct + '%';
 
   const status = document.getElementById('status-text');
