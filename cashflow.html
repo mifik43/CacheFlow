@@ -133,6 +133,27 @@
     padding: 8px 10px;
     font-size: 14px;
   }
+  .row .rname {
+    flex: 1 1 120px;
+    min-width: 0;
+    font-size: 14px;
+    color: var(--text);
+    padding: 8px 10px;
+    background: rgba(15,23,42,0.4);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .row .rpayment, .row .rvalue {
+    flex: 1 1 90px;
+    min-width: 0;
+    text-align: right;
+    font-size: 14px;
+    color: var(--text);
+    padding: 8px 10px;
+    background: rgba(15,23,42,0.4);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
   .row input[type="number"]:focus { outline: none; border-color: var(--accent); }
 
   .summary {
@@ -431,6 +452,36 @@
   .sell-stocks-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
   .sell-stocks-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
   .sell-stocks-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .take-loan-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.9);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .take-loan-overlay.visible { display: flex; }
+  .take-loan-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+  }
+  .take-loan-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
+  .take-loan-modal input {
+    width: 100%;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .take-loan-modal input:focus { outline: none; border-color: var(--accent); }
   .stock-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
   .stock-row .stock-name { flex: 2 1 160px; min-width: 0; }
   .stock-row .stock-price { flex: 1 1 90px; min-width: 0; text-align: right; }
@@ -686,6 +737,21 @@
       </div>
     </div>
   </div>
+
+  <div id="take-loan-overlay" class="take-loan-overlay">
+    <div class="take-loan-modal">
+      <h2>🏦 Взять кредит</h2>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+        <input type="text" id="loan-name" placeholder="Название кредита" inputmode="text" />
+        <input type="number" id="loan-amount" placeholder="Сумма кредита (₽)" min="0" step="1" inputmode="numeric" />
+        <input type="number" id="loan-payment" placeholder="Ежемесячный платёж (₽)" step="1" inputmode="numeric" />
+      </div>
+      <div class="actions" style="justify-content:center;">
+        <button class="primary" id="confirm-take-loan">Подтвердить</button>
+        <button id="cancel-take-loan">Отмена</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -693,155 +759,142 @@ const PROFESSIONS = {
   engineer: {
     income: [{name:'Зарплата', value:5200},{name:'Премия', value:300}],
     expense: [
-      {name:'Налоги', value:1200},{name:'Ипотека', value:1200},{name:'Автокредит', value:400},
-      {name:'Кредитные карты', value:200},{name:'Образование', value:200},
+      {name:'Налоги', value:1200},{name:'Образование', value:200},
       {name:'Продукты', value:600},{name:'Транспорт', value:300},
       {name:'Развлечения', value:200},{name:'Коммунальные', value:150}
     ],
     assets: [{name:'Сбережения', value:1500},{name:'Акции', value:2000}],
-    liabilities: [{name:'Ипотека', value:120000},{name:'Автокредит', value:16000},{name:'Кредитные карты', value:3000}],
+    liabilities: [{name:'Ипотека', value:120000, payment:1200},{name:'Автокредит', value:16000, payment:400},{name:'Кредитные карты', value:3000, payment:200}],
     passive: []
   },
   doctor: {
     income: [{name:'Зарплата', value:12000},{name:'Частная практика', value:4000}],
     expense: [
-      {name:'Налоги', value:3500},{name:'Ипотека', value:2500},{name:'Автокредит', value:800},
-      {name:'Кредитные карты', value:600},{name:'Страховка', value:400},
+      {name:'Налоги', value:3500},{name:'Страховка', value:400},
       {name:'Продукты', value:1000},{name:'Транспорт', value:600},
       {name:'Развлечения', value:500},{name:'Коммунальные', value:400}
     ],
     assets: [{name:'Сбережения', value:3000},{name:'Акции', value:10000},{name:'Фонды', value:15000}],
-    liabilities: [{name:'Ипотека', value:300000},{name:'Автокредит', value:35000},{name:'Кредитные карты', value:8000}],
+    liabilities: [{name:'Ипотека', value:300000, payment:2500},{name:'Автокредит', value:35000, payment:800},{name:'Кредитные карты', value:8000, payment:600}],
     passive: [{name:'Инвестиции', value:800}]
   },
   lawyer: {
     income: [{name:'Зарплата', value:10000},{name:'Частные дела', value:3000}],
     expense: [
-      {name:'Налоги', value:3000},{name:'Ипотека', value:2000},{name:'Автокредит', value:500},
-      {name:'Кредитные карты', value:300},{name:'Образование', value:500},
+      {name:'Налоги', value:3000},{name:'Образование', value:500},
       {name:'Продукты', value:800},{name:'Транспорт', value:400},
       {name:'Развлечения', value:400},{name:'Коммунальные', value:300}
     ],
     assets: [{name:'Сбережения', value:5000},{name:'Акции', value:8000},{name:'Фонды', value:12000}],
-    liabilities: [{name:'Ипотека', value:250000},{name:'Автокредит', value:30000}],
+    liabilities: [{name:'Ипотека', value:250000, payment:2000},{name:'Автокредит', value:30000, payment:500}],
     passive: [{name:'Дивиденды', value:600}]
   },
   manager: {
     income: [{name:'Зарплата', value:7500},{name:'Бонусы', value:1000}],
     expense: [
-      {name:'Налоги', value:2000},{name:'Ипотека', value:1500},{name:'Автокредит', value:350},
-      {name:'Кредитные карты', value:250},{name:'Образование', value:300},
+      {name:'Налоги', value:2000},{name:'Образование', value:300},
       {name:'Продукты', value:700},{name:'Транспорт', value:350},
       {name:'Развлечения', value:300},{name:'Коммунальные', value:200}
     ],
     assets: [{name:'Сбережения', value:2000},{name:'Акции', value:5000}],
-    liabilities: [{name:'Ипотека', value:180000},{name:'Автокредит', value:20000},{name:'Кредитные карты', value:4000}],
+    liabilities: [{name:'Ипотека', value:180000, payment:1500},{name:'Автокредит', value:20000, payment:350},{name:'Кредитные карты', value:4000, payment:250}],
     passive: []
   },
   janitor: {
     income: [{name:'Зарплата', value:2200}],
     expense: [
-      {name:'Налоги', value:400},{name:'Аренда', value:600},{name:'Кредитные карты', value:150},
-      {name:'Продукты', value:500},{name:'Транспорт', value:150},
+      {name:'Налоги', value:400},{name:'Продукты', value:500},{name:'Транспорт', value:150},
       {name:'Развлечения', value:100},{name:'Коммунальные', value:120}
     ],
     assets: [{name:'Сбережения', value:300}],
-    liabilities: [{name:'Кредитные карты', value:1500}],
+    liabilities: [{name:'Кредитные карты', value:1500, payment:150}],
     passive: []
   },
   pilot: {
     income: [{name:'Зарплата', value:9500}],
     expense: [
-      {name:'Налоги', value:2800},{name:'Ипотека', value:2200},{name:'Автокредит', value:600},
-      {name:'Кредитные карты', value:400},{name:'Страховка', value:500},
+      {name:'Налоги', value:2800},{name:'Страховка', value:500},
       {name:'Продукты', value:800},{name:'Транспорт', value:500},
       {name:'Развлечения', value:400},{name:'Коммунальные', value:300}
     ],
     assets: [{name:'Сбережения', value:4000},{name:'Акции', value:7000}],
-    liabilities: [{name:'Ипотека', value:260000},{name:'Автокредит', value:28000},{name:'Кредитные карты', value:5000}],
+    liabilities: [{name:'Ипотека', value:260000, payment:2200},{name:'Автокредит', value:28000, payment:600},{name:'Кредитные карты', value:5000, payment:400}],
     passive: [{name:'Инвестиции', value:500}]
   },
   teacher: {
     income: [{name:'Зарплата', value:3500}],
     expense: [
-      {name:'Налоги', value:800},{name:'Ипотека', value:900},{name:'Автокредит', value:250},
-      {name:'Кредитные карты', value:150},{name:'Образование', value:100},
+      {name:'Налоги', value:800},{name:'Образование', value:100},
       {name:'Продукты', value:500},{name:'Транспорт', value:200},
       {name:'Развлечения', value:150},{name:'Коммунальные', value:150}
     ],
     assets: [{name:'Сбережения', value:500},{name:'Фонды', value:1000}],
-    liabilities: [{name:'Ипотека', value:120000},{name:'Автокредит', value:12000}],
+    liabilities: [{name:'Ипотека', value:120000, payment:900},{name:'Автокредит', value:12000, payment:250}],
     passive: []
   },
   police: {
     income: [{name:'Зарплата', value:4200}],
     expense: [
-      {name:'Налоги', value:1000},{name:'Ипотека', value:1000},{name:'Автокредит', value:300},
-      {name:'Кредитные карты', value:200},{name:'Страховка', value:200},
+      {name:'Налоги', value:1000},{name:'Страховка', value:200},
       {name:'Продукты', value:600},{name:'Транспорт', value:250},
       {name:'Развлечения', value:200},{name:'Коммунальные', value:180}
     ],
     assets: [{name:'Сбережения', value:800},{name:'Акции', value:2000}],
-    liabilities: [{name:'Ипотека', value:140000},{name:'Автокредит', value:15000}],
+    liabilities: [{name:'Ипотека', value:140000, payment:1000},{name:'Автокредит', value:15000, payment:300}],
     passive: []
   },
   nurse: {
     income: [{name:'Зарплата', value:3800}],
     expense: [
-      {name:'Налоги', value:900},{name:'Ипотека', value:850},{name:'Автокредит', value:280},
-      {name:'Кредитные карты', value:180},{name:'Страховка', value:150},
+      {name:'Налоги', value:900},{name:'Страховка', value:150},
       {name:'Продукты', value:550},{name:'Транспорт', value:220},
       {name:'Развлечения', value:180},{name:'Коммунальные', value:160}
     ],
     assets: [{name:'Сбережения', value:600},{name:'Фонды', value:1500}],
-    liabilities: [{name:'Ипотека', value:130000},{name:'Автокредит', value:14000}],
+    liabilities: [{name:'Ипотека', value:130000, payment:850},{name:'Автокредит', value:14000, payment:280}],
     passive: []
   },
   mechanic: {
     income: [{name:'Зарплата', value:4000},{name:'Частная работа', value:800}],
     expense: [
-      {name:'Налоги', value:1000},{name:'Ипотека', value:900},{name:'Автокредит', value:300},
-      {name:'Кредитные карты', value:200},{name:'Продукты', value:600},
+      {name:'Налоги', value:1000},{name:'Продукты', value:600},
       {name:'Транспорт', value:250},{name:'Развлечения', value:200},{name:'Коммунальные', value:170}
     ],
     assets: [{name:'Сбережения', value:700},{name:'Акции', value:2500}],
-    liabilities: [{name:'Ипотека', value:140000},{name:'Автокредит', value:16000}],
+    liabilities: [{name:'Ипотека', value:140000, payment:900},{name:'Автокредит', value:16000, payment:300}],
     passive: []
   },
   business_manager: {
     income: [{name:'Зарплата', value:4600}],
     expense: [
-      {name:'Налоги', value:1200},{name:'Ипотека', value:1100},{name:'Автокредит', value:400},
-      {name:'Кредитные карты', value:250},{name:'Образование', value:200},
+      {name:'Налоги', value:1200},{name:'Образование', value:200},
       {name:'Продукты', value:650},{name:'Транспорт', value:350},
       {name:'Развлечения', value:300},{name:'Коммунальные', value:250}
     ],
     assets: [{name:'Сбережения', value:1500},{name:'Акции', value:2500}],
-    liabilities: [{name:'Ипотека', value:160000},{name:'Автокредит', value:18000},{name:'Кредитные карты', value:3000}],
+    liabilities: [{name:'Ипотека', value:160000, payment:1100},{name:'Автокредит', value:18000, payment:400},{name:'Кредитные карты', value:3000, payment:250}],
     passive: []
   },
   secretary: {
     income: [{name:'Зарплата', value:2500}],
     expense: [
-      {name:'Налоги', value:500},{name:'Аренда', value:600},{name:'Автокредит', value:250},
-      {name:'Кредитные карты', value:200},
+      {name:'Налоги', value:500},{name:'Аренда', value:600},
       {name:'Продукты', value:500},{name:'Транспорт', value:200},
       {name:'Развлечения', value:150},{name:'Коммунальные', value:120}
     ],
     assets: [{name:'Сбережения', value:400},{name:'Акции', value:800}],
-    liabilities: [{name:'Автокредит', value:10000},{name:'Кредитные карты', value:2000}],
+    liabilities: [{name:'Автокредит', value:10000, payment:250},{name:'Кредитные карты', value:2000, payment:200}],
     passive: []
   },
   truck_driver: {
     income: [{name:'Зарплата', value:2500}],
     expense: [
-      {name:'Налоги', value:500},{name:'Аренда', value:500},{name:'Автокредит', value:400},
-      {name:'Кредитные карты', value:150},
+      {name:'Налоги', value:500},{name:'Аренда', value:500},
       {name:'Продукты', value:500},{name:'Транспорт', value:300},
       {name:'Развлечения', value:150},{name:'Коммунальные', value:100}
     ],
     assets: [{name:'Сбережения', value:300}],
-    liabilities: [{name:'Автокредит', value:12000},{name:'Кредитные карты', value:1500}],
+    liabilities: [{name:'Автокредит', value:12000, payment:400},{name:'Кредитные карты', value:1500, payment:150}],
     passive: []
   }
 };
@@ -850,37 +903,35 @@ const FAST_TRACK_PROFESSIONS = {
   investor: {
     income: [{name:'Зарплата инвестора', value:50000},{name:'Дивиденды', value:15000}],
     expense: [
-      {name:'Налоги', value:15000},{name:'Ипотека', value:8000},{name:'Автокредит', value:2000},
-      {name:'Кредитные карты', value:1000},{name:'Страховка', value:2000},
+      {name:'Налоги', value:15000},{name:'Страховка', value:2000},
       {name:'Продукты', value:3000},{name:'Транспорт', value:1500},
       {name:'Развлечения', value:2000},{name:'Коммунальные', value:1000}
     ],
     assets: [{name:'Сбережения', value:50000},{name:'Акции', value:200000},{name:'Фонды', value:300000},{name:'Недвижимость', value:500000}],
-    liabilities: [{name:'Ипотека', value:2000000},{name:'Автокредит', value:200000},{name:'Кредитные карты', value:50000}],
+    liabilities: [{name:'Ипотека', value:2000000, payment:8000},{name:'Автокредит', value:200000, payment:2000},{name:'Кредитные карты', value:50000, payment:1000}],
     passive: [{name:'Дивиденды', value:15000},{name:'Рентный доход', value:8000}]
   },
   entrepreneur: {
     income: [{name:'Бизнес', value:100000},{name:'Консалтинг', value:20000}],
     expense: [
       {name:'Налоги', value:30000},{name:'Офис', value:10000},{name:'Персонал', value:25000},
-      {name:'Кредиты', value:5000},{name:'Страховка', value:3000},
+      {name:'Страховка', value:3000},
       {name:'Продукты', value:4000},{name:'Транспорт', value:3000},
       {name:'Развлечения', value:3000},{name:'Коммунальные', value:2000}
     ],
     assets: [{name:'Сбережения', value:100000},{name:'Бизнес', value:1000000},{name:'Акции', value:500000},{name:'Недвижимость', value:800000}],
-    liabilities: [{name:'Бизнес-кредит', value:3000000},{name:'Ипотека', value:1500000}],
+    liabilities: [{name:'Бизнес-кредит', value:3000000, payment:5000},{name:'Ипотека', value:1500000}],
     passive: [{name:'Бизнес-доход', value:35000},{name:'Дивиденды', value:12000}]
   },
   developer: {
     income: [{name:'Зарплата', value:80000},{name:'Фриланс', value:30000}],
     expense: [
-      {name:'Налоги', value:25000},{name:'Ипотека', value:6000},{name:'Автокредит', value:1500},
-      {name:'Кредитные карты', value:500},{name:'Страховка', value:1500},
+      {name:'Налоги', value:25000},{name:'Страховка', value:1500},
       {name:'Продукты', value:2500},{name:'Транспорт', value:1200},
       {name:'Развлечения', value:2000},{name:'Коммунальные', value:800}
     ],
     assets: [{name:'Сбережения', value:80000},{name:'Акции', value:150000},{name:'Крипта', value:100000},{name:'Недвижимость', value:400000}],
-    liabilities: [{name:'Ипотека', value:1200000},{name:'Автокредит', value:100000}],
+    liabilities: [{name:'Ипотека', value:1200000, payment:6000},{name:'Автокредит', value:100000, payment:1500}],
     passive: [{name:'Дивиденды', value:10000},{name:'Фриланс', value:8000}]
   }
 };
@@ -983,35 +1034,83 @@ function rowHTML(name='', value='', isCurrency=false) {
 function renderSection(section) {
   const meta = sectionMeta[section];
   const container = document.getElementById(meta.id);
-  container.innerHTML = pending[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency)).join('');
-  container.querySelectorAll('.row').forEach((row, idx) => {
-    const item = pending[section][idx];
-    row.querySelector('.rname').value = item.name;
-    row.querySelector('.rvalue').value = item.value;
-    row.querySelector('.rname').addEventListener('input', e => {
-      const oldName = item.name;
-      item.name = e.target.value;
-      const linked = section === 'expense' ? 'liability' : section === 'liability' ? 'expense' : null;
-      if (linked) {
-        const linkedItem = pending[linked].find(i => i.name === oldName);
+  
+  if (section === 'liability') {
+    container.innerHTML = pending[section].map((item, idx) => 
+      `<div class="row">
+        <input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" />
+        <span class="rpayment">${fmt(Number(item.payment) || 0)}</span>
+        <span class="rvalue">${fmt(Number(item.value) || 0)}</span>
+        <button class="remove" title="Удалить" aria-label="Удалить">✕</button>
+      </div>`
+    ).join('');
+    
+    container.querySelectorAll('.row').forEach((row, idx) => {
+      const item = pending[section][idx];
+      
+      row.querySelector('.rname').addEventListener('input', e => {
+        const oldName = item.name;
+        item.name = e.target.value;
+        const linkedItem = pending.expense.find(i => i.name === oldName);
         if (linkedItem) {
           linkedItem.name = e.target.value;
-          renderSection(linked);
         }
-      }
-      renderStaging();
-      saveState();
+        syncLiabilityExpense(item);
+        renderSection('expense');
+        renderStaging();
+        saveState();
+      });
+      
+      row.querySelector('.remove').addEventListener('click', () => {
+        const removedName = pending[section][idx].name;
+        pending[section].splice(idx, 1);
+        const expenseIdx = pending.expense.findIndex(e => e.name === removedName);
+        if (expenseIdx !== -1) {
+          pending.expense.splice(expenseIdx, 1);
+        }
+        pending.cashOnHand -= Number(item.value) || 0;
+        updateCashUI();
+        renderSection('expense');
+        renderSection(section);
+        renderStaging();
+        saveState();
+      });
     });
-    row.querySelector('.rvalue').addEventListener('input', e => { item.value = Number(e.target.value) || 0; renderStaging(); saveState(); });
-    row.querySelector('.remove').addEventListener('click', () => {
-      const removedName = pending[section][idx].name;
-      pending[section].splice(idx, 1);
-      syncLinked(section, removedName);
-      renderSection(section);
-      renderStaging();
-      saveState();
+  } else {
+    container.innerHTML = pending[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency)).join('');
+    container.querySelectorAll('.row').forEach((row, idx) => {
+      const item = pending[section][idx];
+      row.querySelector('.rname').value = item.name;
+      row.querySelector('.rvalue').value = item.value;
+      row.querySelector('.rname').addEventListener('input', e => {
+        const oldName = item.name;
+        item.name = e.target.value;
+        const linked = section === 'expense' ? 'liability' : section === 'liability' ? 'expense' : null;
+        if (linked) {
+          const linkedItem = pending[linked].find(i => i.name === oldName);
+          if (linkedItem) {
+            linkedItem.name = e.target.value;
+            renderSection(linked);
+          }
+        }
+        renderStaging();
+        saveState();
+      });
+      row.querySelector('.rvalue').addEventListener('input', e => { item.value = Number(e.target.value) || 0; renderStaging(); saveState(); });
+      row.querySelector('.remove').addEventListener('click', () => {
+        const removedName = pending[section][idx].name;
+        pending[section].splice(idx, 1);
+        const expenseIdx = pending.expense.findIndex(e => e.name === removedName);
+        if (expenseIdx !== -1) {
+          pending.expense.splice(expenseIdx, 1);
+        }
+        renderSection('expense');
+        renderSection(section);
+        renderStaging();
+        saveState();
+      });
     });
-  });
+  }
 }
 
 function renderStocks() {
@@ -1054,6 +1153,31 @@ function syncLinked(sourceSection, removedName) {
   }
 }
 
+function syncLiabilityExpense(item) {
+  const payment = Number(item.payment) || 0;
+  const name = item.name;
+  
+  if (payment > 0 && name) {
+    const existingIdx = pending.expense.findIndex(e => e.name === name);
+    if (existingIdx >= 0) {
+      pending.expense[existingIdx].value = payment;
+    } else {
+      pending.expense.push({name, value: payment});
+    }
+  } else {
+    const idx = pending.expense.findIndex(e => e.name === name);
+    if (idx !== -1) {
+      pending.expense.splice(idx, 1);
+    }
+  }
+}
+
+function syncAllLiabilityExpenses() {
+  pending.liability.forEach(item => {
+    syncLiabilityExpense(item);
+  });
+}
+
 function updateCashUI() {
   document.getElementById('cash-on-hand').textContent = fmt(pending.cashOnHand);
 }
@@ -1094,21 +1218,35 @@ function removeCash() {
   saveState();
 }
 
-function takeLoan() {
-  const raw = prompt('Введите сумму кредита:');
-  if (raw === null) return;
-  const amount = Math.max(0, Number(raw) || 0);
-  if (amount <= 0) return;
+function takeLoanModal() {
+  document.getElementById('loan-name').value = '';
+  document.getElementById('loan-amount').value = '';
+  document.getElementById('loan-payment').value = '';
+  document.getElementById('take-loan-overlay').classList.add('visible');
+  document.getElementById('loan-amount').focus();
+}
+
+function confirmTakeLoan() {
+  const nameInput = document.getElementById('loan-name');
+  const amountInput = document.getElementById('loan-amount');
+  const paymentInput = document.getElementById('loan-payment');
+  const overlay = document.getElementById('take-loan-overlay');
   
-  const interest = Math.round(amount * 0.1);
+  const name = nameInput.value.trim();
+  const amount = Math.max(0, Number(amountInput.value) || 0);
+  const payment = Number(paymentInput.value) || 0;
+  
+  if (!name) { nameInput.focus(); return; }
+  if (amount <= 0) { amountInput.focus(); return; }
+  
   const defaultName = `Кредит ${fmt(amount)}`;
-  const nameInput = prompt('Название кредита:', defaultName);
-  if (nameInput === null) return;
-  const loanName = nameInput.trim() || defaultName;
+  const loanName = name || defaultName;
   
-  pending.liability.push({name: loanName, value: amount});
-  pending.expense.push({name: loanName, value: interest});
+  pending.liability.push({name: loanName, value: amount, payment: payment});
+  syncLiabilityExpense(pending.liability[pending.liability.length - 1]);
   pending.cashOnHand += amount;
+  
+  overlay.classList.remove('visible');
   renderAll();
   updateCashUI();
   renderStaging();
@@ -1123,6 +1261,10 @@ function takeLoan() {
       nameField.select();
     }
   }
+}
+
+function cancelTakeLoan() {
+  document.getElementById('take-loan-overlay').classList.remove('visible');
 }
 
 function buyProperty() {
@@ -1499,6 +1641,9 @@ function addEmpty(section) {
   if (section === 'stocks') {
     pending.stocks.push({name:'', price:0, count:0});
     renderStocks();
+  } else if (section === 'liability') {
+    takeLoanModal();
+    return;
   } else {
     pending[section].push({name:'', value:0});
     renderSection(section);
@@ -1712,6 +1857,7 @@ function loadProfession(key) {
   };
   committed = cloneState(base);
   pending = cloneState(base);
+  syncAllLiabilityExpenses();
   renderAll();
   updateSummary(committed);
   renderStaging();
@@ -1777,11 +1923,21 @@ document.getElementById('sell-stock-price').addEventListener('input', updateSell
 document.getElementById('sell-stock-count').addEventListener('input', updateSellFormTotal);
 document.getElementById('sell-stock-total').addEventListener('input', updateSellFormTotal);
 
+document.getElementById('loan-amount').addEventListener('input', e => {
+  const amount = Math.max(0, Number(e.target.value) || 0);
+  const payment = Math.round(amount * 0.1);
+  document.getElementById('loan-payment').value = payment;
+});
+
+document.getElementById('confirm-take-loan').addEventListener('click', confirmTakeLoan);
+document.getElementById('cancel-take-loan').addEventListener('click', cancelTakeLoan);
+
 if (!loadState()) {
   loadProfession('engineer');
   setGameMode('rat-race');
   saveState();
 } else {
+  syncAllLiabilityExpenses();
   renderAll();
   updateSummary(pending);
   renderStaging();
