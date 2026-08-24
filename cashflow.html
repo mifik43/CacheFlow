@@ -452,6 +452,70 @@
   .sell-stocks-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
   .sell-stocks-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
   .sell-stocks-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .buy-asset-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.9);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .buy-asset-overlay.visible { display: flex; }
+  .buy-asset-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+  }
+  .buy-asset-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
+  .buy-asset-modal input {
+    width: 100%;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .buy-asset-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
+  .buy-asset-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
+  .buy-asset-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
+  .sell-asset-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.9);
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .sell-asset-overlay.visible { display: flex; }
+  .sell-asset-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+  }
+  .sell-asset-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
+  .sell-asset-modal input {
+    width: 100%;
+    background: #0b1220;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .sell-asset-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
+  .sell-asset-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
+  .sell-asset-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
   .take-loan-overlay {
     display: none;
     position: fixed;
@@ -489,6 +553,7 @@
   .stock-row .stock-total { flex: 1 1 100px; min-width: 0; text-align: right; font-weight: 600; }
   .stock-row .stock-buy { flex: 0 0 auto; padding: 6px 10px; font-size: 12px; background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 600; }
   .stock-row .stock-sell { flex: 0 0 auto; padding: 6px 10px; font-size: 12px; background: var(--green); color: #0f172a; border-color: var(--green); font-weight: 600; }
+  .row .sell-asset { flex: 0 0 auto; padding: 6px 10px; font-size: 12px; background: var(--green); color: #0f172a; border-color: var(--green); font-weight: 600; }
   .buy-property-modal input:focus { outline: none; border-color: var(--accent); }
   .transition-overlay {
     display: none;
@@ -749,6 +814,42 @@
       <div class="actions" style="justify-content:center;">
         <button class="primary" id="confirm-take-loan">Подтвердить</button>
         <button id="cancel-take-loan">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="buy-asset-overlay" class="buy-asset-overlay">
+    <div class="buy-asset-modal">
+      <h2>💰 Купить актив</h2>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+        <input type="text" id="asset-name" placeholder="Название актива" inputmode="text" />
+        <input type="number" id="asset-price" placeholder="Стоимость актива (₽)" min="0" step="1" inputmode="numeric" />
+      </div>
+      <div class="total-row">
+        <span>Итоговая стоимость:</span>
+        <span class="total-value" id="asset-total-display">0 ₽</span>
+      </div>
+      <div class="actions" style="justify-content:center;">
+        <button class="primary" id="confirm-buy-asset">Подтвердить покупку</button>
+        <button id="cancel-buy-asset">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="sell-asset-overlay" class="sell-asset-overlay">
+    <div class="sell-asset-modal">
+      <h2>💸 Продать актив</h2>
+      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+        <input type="text" id="sell-asset-name" placeholder="Название актива" inputmode="text" />
+        <input type="number" id="sell-asset-price" placeholder="Стоимость продажи (₽)" min="0" step="1" inputmode="numeric" />
+      </div>
+      <div class="total-row">
+        <span>Сумма продажи:</span>
+        <span class="total-value" id="sell-asset-total-display">0 ₽</span>
+      </div>
+      <div class="actions" style="justify-content:center;">
+        <button class="primary" id="confirm-sell-asset">Подтвердить продажу</button>
+        <button id="cancel-sell-asset">Отмена</button>
       </div>
     </div>
   </div>
@@ -1076,6 +1177,27 @@ function renderSection(section) {
         saveState();
       });
     });
+  } else if (section === 'asset') {
+    container.innerHTML = pending[section].map((item, idx) => 
+      `<div class="row">
+        <input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" />
+        <span class="rvalue">${fmt(Number(item.value) || 0)}</span>
+        <button class="sell-asset" data-idx="${idx}" title="Продать" aria-label="Продать">Продать</button>
+      </div>`
+    ).join('');
+    
+    container.querySelectorAll('.row').forEach((row, idx) => {
+      const item = pending[section][idx];
+      row.querySelector('.rname').value = item.name;
+      row.querySelector('.rname').addEventListener('input', e => {
+        item.name = e.target.value;
+        renderStaging();
+        saveState();
+      });
+      row.querySelector('.sell-asset').addEventListener('click', () => {
+        openSellAsset(idx);
+      });
+    });
   } else {
     container.innerHTML = pending[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency)).join('');
     container.querySelectorAll('.row').forEach((row, idx) => {
@@ -1096,7 +1218,11 @@ function renderSection(section) {
         renderStaging();
         saveState();
       });
-      row.querySelector('.rvalue').addEventListener('input', e => { item.value = Number(e.target.value) || 0; renderStaging(); saveState(); });
+      row.querySelector('.rvalue').addEventListener('input', e => {
+        item.value = Number(e.target.value) || 0;
+        renderStaging();
+        saveState();
+      });
       row.querySelector('.remove').addEventListener('click', () => {
         const removedName = pending[section][idx].name;
         pending[section].splice(idx, 1);
@@ -1265,6 +1391,116 @@ function confirmTakeLoan() {
 
 function cancelTakeLoan() {
   document.getElementById('take-loan-overlay').classList.remove('visible');
+}
+
+let buyAssetIndex = -1;
+
+function buyAssetModal() {
+  buyAssetIndex = -1;
+  const overlay = document.getElementById('buy-asset-overlay');
+  document.getElementById('asset-name').value = '';
+  document.getElementById('asset-price').value = '';
+  document.getElementById('asset-total-display').textContent = '0 ₽';
+  overlay.classList.add('visible');
+  document.getElementById('asset-name').focus();
+}
+
+function openBuyAsset(idx) {
+  buyAssetIndex = idx;
+  const asset = pending.asset[idx];
+  const overlay = document.getElementById('buy-asset-overlay');
+  document.getElementById('asset-name').value = asset ? asset.name : '';
+  document.getElementById('asset-price').value = asset ? asset.value : '';
+  document.getElementById('asset-total-display').textContent = fmt(Number(asset ? asset.value : 0) || 0);
+  overlay.classList.add('visible');
+  document.getElementById('asset-price').focus();
+}
+
+function updateAssetFormTotal() {
+  const price = Math.max(0, Number(document.getElementById('asset-price').value) || 0);
+  document.getElementById('asset-total-display').textContent = fmt(price);
+}
+
+function confirmBuyAsset() {
+  const nameInput = document.getElementById('asset-name');
+  const priceInput = document.getElementById('asset-price');
+  const overlay = document.getElementById('buy-asset-overlay');
+
+  const name = nameInput.value.trim();
+  const price = Math.max(0, Number(priceInput.value) || 0);
+
+  if (!name) { nameInput.focus(); return; }
+  if (price <= 0) { priceInput.focus(); return; }
+
+  if (buyAssetIndex >= 0 && buyAssetIndex < pending.asset.length) {
+    pending.asset[buyAssetIndex].name = name;
+    pending.asset[buyAssetIndex].value = price;
+  } else {
+    pending.asset.push({name, value: price});
+  }
+  pending.cashOnHand -= price;
+
+  overlay.classList.remove('visible');
+  renderAll();
+  updateCashUI();
+  renderStaging();
+  saveState();
+  checkEscape();
+  buyAssetIndex = -1;
+}
+
+function cancelBuyAsset() {
+  document.getElementById('buy-asset-overlay').classList.remove('visible');
+  buyAssetIndex = -1;
+}
+
+let sellAssetIndex = -1;
+
+function openSellAsset(idx) {
+  sellAssetIndex = idx;
+  const asset = pending.asset[idx];
+  if (!asset) return;
+  const overlay = document.getElementById('sell-asset-overlay');
+  document.getElementById('sell-asset-name').value = asset.name;
+  document.getElementById('sell-asset-price').value = asset.value;
+  document.getElementById('sell-asset-total-display').textContent = fmt(Number(asset.value) || 0);
+  overlay.classList.add('visible');
+  document.getElementById('sell-asset-price').focus();
+}
+
+function updateSellAssetFormTotal() {
+  const price = Math.max(0, Number(document.getElementById('sell-asset-price').value) || 0);
+  document.getElementById('sell-asset-total-display').textContent = fmt(price);
+}
+
+function confirmSellAsset() {
+  const nameInput = document.getElementById('sell-asset-name');
+  const priceInput = document.getElementById('sell-asset-price');
+  const overlay = document.getElementById('sell-asset-overlay');
+
+  const name = nameInput.value.trim();
+  const price = Math.max(0, Number(priceInput.value) || 0);
+
+  if (!name) { nameInput.focus(); return; }
+  if (price <= 0) { priceInput.focus(); return; }
+
+  if (sellAssetIndex >= 0 && sellAssetIndex < pending.asset.length) {
+    pending.asset.splice(sellAssetIndex, 1);
+  }
+  pending.cashOnHand += price;
+
+  overlay.classList.remove('visible');
+  renderAll();
+  updateCashUI();
+  renderStaging();
+  saveState();
+  checkEscape();
+  sellAssetIndex = -1;
+}
+
+function cancelSellAsset() {
+  document.getElementById('sell-asset-overlay').classList.remove('visible');
+  sellAssetIndex = -1;
 }
 
 function buyProperty() {
@@ -1598,8 +1834,10 @@ function buyDeal(type, idx) {
   if (!deal) return;
   
   pending.asset.push({name: deal.name, value: deal.cost});
+  pending.cashOnHand -= deal.cost;
   pending.passive.push({name: deal.name + ' (доход)', value: deal.income});
   renderAll();
+  updateCashUI();
   renderStaging();
   saveState();
   checkEscape();
@@ -1643,6 +1881,9 @@ function addEmpty(section) {
     renderStocks();
   } else if (section === 'liability') {
     takeLoanModal();
+    return;
+  } else if (section === 'asset') {
+    buyAssetModal();
     return;
   } else {
     pending[section].push({name:'', value:0});
@@ -1922,6 +2163,13 @@ document.getElementById('cancel-sell-stocks').addEventListener('click', cancelSe
 document.getElementById('sell-stock-price').addEventListener('input', updateSellFormTotal);
 document.getElementById('sell-stock-count').addEventListener('input', updateSellFormTotal);
 document.getElementById('sell-stock-total').addEventListener('input', updateSellFormTotal);
+
+document.getElementById('confirm-buy-asset').addEventListener('click', confirmBuyAsset);
+document.getElementById('cancel-buy-asset').addEventListener('click', cancelBuyAsset);
+document.getElementById('asset-price').addEventListener('input', updateAssetFormTotal);
+document.getElementById('confirm-sell-asset').addEventListener('click', confirmSellAsset);
+document.getElementById('cancel-sell-asset').addEventListener('click', cancelSellAsset);
+document.getElementById('sell-asset-price').addEventListener('input', updateSellAssetFormTotal);
 
 document.getElementById('loan-amount').addEventListener('input', e => {
   const amount = Math.max(0, Number(e.target.value) || 0);
