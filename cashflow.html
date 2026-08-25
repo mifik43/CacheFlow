@@ -133,13 +133,7 @@
     .col-6, .col-4, .col-3 { grid-column: span 12; }
   }
 
-  .card h2 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    color: var(--muted);
-  }
+
   .row {
     display: flex;
     align-items: center;
@@ -404,40 +398,48 @@
     font-size: 12px;
     padding: 4px 8px;
   }
-  .win-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,0.85);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .win-overlay.visible { display: flex; }
-  .win-modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 480px;
-    width: 100%;
-    text-align: center;
-  }
-  .win-modal h2 { margin: 0 0 12px 0; font-size: 24px; color: var(--green); }
-  .win-modal p { color: var(--muted); margin: 0 0 20px 0; }
-  .buy-property-overlay {
+  .modal-overlay,
+  .win-overlay,
+  .buy-property-overlay,
+  .buy-stocks-overlay,
+  .sell-stocks-overlay,
+  .buy-asset-overlay,
+  .sell-asset-overlay,
+  .take-loan-overlay,
+  .sell-property-overlay,
+  .settings-overlay,
+  .transition-overlay {
     display: none;
     position: fixed;
     inset: 0;
     background: rgba(15,23,42,0.9);
-    z-index: 1001;
     align-items: center;
     justify-content: center;
     padding: 24px;
   }
-  .buy-property-overlay.visible { display: flex; }
-  .buy-property-modal {
+  .modal-overlay.visible,
+  .win-overlay.visible,
+  .buy-property-overlay.visible,
+  .buy-stocks-overlay.visible,
+  .sell-stocks-overlay.visible,
+  .buy-asset-overlay.visible,
+  .sell-asset-overlay.visible,
+  .take-loan-overlay.visible,
+  .sell-property-overlay.visible,
+  .settings-overlay.visible,
+  .transition-overlay.visible { display: flex; }
+
+  .modal,
+  .win-modal,
+  .buy-property-modal,
+  .buy-stocks-modal,
+  .sell-stocks-modal,
+  .buy-asset-modal,
+  .sell-asset-modal,
+  .take-loan-modal,
+  .sell-property-modal,
+  .settings-modal,
+  .transition-modal {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -445,237 +447,25 @@
     max-width: 420px;
     width: 100%;
   }
-  .buy-property-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
-  .buy-property-modal input {
-    width: 100%;
-    background: #0b1220;
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-  .buy-stocks-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,0.9);
-    z-index: 1001;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .buy-stocks-overlay.visible { display: flex; }
-  .buy-stocks-modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 420px;
-    width: 100%;
-  }
-  .buy-stocks-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
-  .buy-stocks-modal input {
-    width: 100%;
-    background: #0b1220;
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-  .buy-stocks-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
-  .buy-stocks-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
-  .buy-stocks-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
-  .sell-stocks-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,0.9);
-    z-index: 1001;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .sell-stocks-overlay.visible { display: flex; }
-  .sell-stocks-modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 420px;
-    width: 100%;
-  }
-  .sell-stocks-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
-  .sell-stocks-modal input {
-    width: 100%;
-    background: #0b1220;
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-  .sell-stocks-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
-  .sell-stocks-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
-  .sell-stocks-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
-  .buy-asset-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,0.9);
-    z-index: 1001;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .buy-asset-overlay.visible { display: flex; }
-  .buy-asset-modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 420px;
-    width: 100%;
-  }
-  .buy-asset-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
-  .buy-asset-modal input {
-    width: 100%;
-    background: #0b1220;
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-  .buy-asset-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
-  .buy-asset-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
-  .buy-asset-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
-  .sell-asset-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,0.9);
-    z-index: 1001;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .sell-asset-overlay.visible { display: flex; }
-  .sell-asset-modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 420px;
-    width: 100%;
-  }
-  .sell-asset-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
-  .sell-asset-modal input {
-    width: 100%;
-    background: #0b1220;
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-  .sell-asset-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
-  .sell-asset-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
-  .sell-asset-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
-  .take-loan-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,0.9);
-    z-index: 1001;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .take-loan-overlay.visible { display: flex; }
-  .take-loan-modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 420px;
-    width: 100%;
-  }
-  .take-loan-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
-  .take-loan-modal input {
-    width: 100%;
-    background: #0b1220;
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-  .take-loan-modal input:focus { outline: none; border-color: var(--accent); }
-  .stock-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; position: relative; }
-  .stock-row .stock-name { flex: 2 1 160px; min-width: 0; }
-  .stock-row .stock-price { flex: 1 1 90px; min-width: 0; text-align: right; }
-  .stock-row .stock-count { flex: 1 1 70px; min-width: 0; text-align: right; }
-  .stock-row .stock-total { flex: 1 1 100px; min-width: 0; text-align: right; font-weight: 600; }
-  .stock-row .stock-buy { flex: 0 0 auto; padding: 6px 10px; font-size: 12px; background: var(--accent); color: #0f172a; border-color: var(--accent); font-weight: 600; }
-  .stock-row .stock-sell { flex: 0 0 auto; padding: 6px 10px; font-size: 12px; background: var(--green); color: #0f172a; border-color: var(--green); font-weight: 600; }
-  .row .sell-asset { flex: 0 0 auto; padding: 6px 10px; font-size: 12px; background: var(--green); color: #0f172a; border-color: var(--green); font-weight: 600; }
-  .buy-property-modal input:focus { outline: none; border-color: var(--accent); }
-  .sell-property-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,0.9);
-    z-index: 1001;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .sell-property-overlay.visible { display: flex; }
-  .sell-property-modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 420px;
-    width: 100%;
-  }
-  .sell-property-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
-  .sell-property-modal input {
-    width: 100%;
-    background: #0b1220;
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 14px;
-  }
-  .sell-property-modal input:focus { outline: none; border-color: var(--accent); }
-  .sell-property-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
-  .sell-property-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
-  .sell-property-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
-  .settings-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,0.9);
-    z-index: 1002;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .settings-overlay.visible { display: flex; }
-  .settings-modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 420px;
-    width: 100%;
-  }
-  .settings-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
-  .settings-modal label { font-size: 14px; color: var(--muted); display: block; margin-bottom: 6px; }
+  .modal h2,
+  .win-modal h2,
+  .buy-property-modal h2,
+  .buy-stocks-modal h2,
+  .sell-stocks-modal h2,
+  .buy-asset-modal h2,
+  .sell-asset-modal h2,
+  .take-loan-modal h2,
+  .sell-property-modal h2,
+  .settings-modal h2,
+  .transition-modal h2 { margin: 0 0 16px 0; font-size: 20px; color: var(--accent); }
+  .modal input,
+  .buy-property-modal input,
+  .buy-stocks-modal input,
+  .sell-stocks-modal input,
+  .buy-asset-modal input,
+  .sell-asset-modal input,
+  .take-loan-modal input,
+  .sell-property-modal input,
   .settings-modal input {
     width: 100%;
     background: #0b1220;
@@ -684,33 +474,79 @@
     border-radius: 8px;
     padding: 10px 12px;
     font-size: 14px;
-    margin-bottom: 14px;
   }
+  .modal input:focus,
+  .buy-property-modal input:focus,
+  .buy-stocks-modal input:focus,
+  .sell-stocks-modal input:focus,
+  .buy-asset-modal input:focus,
+  .sell-asset-modal input:focus,
+  .take-loan-modal input:focus,
+  .sell-property-modal input:focus,
   .settings-modal input:focus { outline: none; border-color: var(--accent); }
-  .transition-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15,23,42,0.9);
-    z-index: 999;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-  .transition-overlay.visible { display: flex; }
-  .transition-modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 480px;
-    width: 100%;
-    text-align: center;
-  }
+  .modal .row,
+  .buy-stocks-modal .row,
+  .sell-stocks-modal .row,
+  .buy-asset-modal .row,
+  .sell-asset-modal .row,
+  .sell-property-modal .row { flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 14px; }
+  .modal .total-row,
+  .buy-stocks-modal .total-row,
+  .sell-stocks-modal .total-row,
+  .buy-asset-modal .total-row,
+  .sell-asset-modal .total-row,
+  .sell-property-modal .total-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; font-size: 14px; color: var(--muted); }
+  .modal .total-value,
+  .buy-stocks-modal .total-value,
+  .sell-stocks-modal .total-value,
+  .buy-asset-modal .total-value,
+  .sell-asset-modal .total-value,
+  .sell-property-modal .total-value { font-size: 18px; font-weight: 700; color: var(--text); }
+
+  .win-overlay { z-index: 1000; background: rgba(15,23,42,0.85); }
+  .win-modal { max-width: 480px; text-align: center; }
+  .win-modal h2 { margin: 0 0 12px 0; font-size: 24px; color: var(--green); }
+  .win-modal p { color: var(--muted); margin: 0 0 20px 0; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  .transition-overlay { z-index: 999; }
+  .transition-modal { max-width: 480px; text-align: center; }
   .transition-modal h2 { margin: 0 0 12px 0; font-size: 22px; color: var(--accent); }
   .transition-modal p { color: var(--muted); margin: 0 0 20px 0; }
+  .settings-modal label { font-size: 14px; color: var(--muted); display: block; margin-bottom: 6px; }
+  .settings-modal input { margin-bottom: 14px; }
   .cash-actions button { font-size: 13px; padding: 8px 12px; }
   .cash-actions button:hover { border-color: var(--accent); }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  .deals-section { display: none; }
+  .deals-grid { grid-template-columns: repeat(12, 1fr); gap: 16px; }
+  .deal-subtitle { margin: 0 0 10px 0; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .hint-text { font-size: 12px; color: var(--muted); }
+  .modal .actions { justify-content: center; }
+  #escape-indicator { width: 0%; }
+  #settings-btn { margin-left: 8px; }
+  .profession-label { color: var(--muted); font-size: 14px; }
+  .row-removed { opacity: 0.5; pointer-events: none; }
+  .stock-row-removed { opacity: 0.5; }
+  .btn-hidden { display: none; }
+  .change-good { color: var(--green); }
+  .change-bad { color: var(--red); }
   @media (max-width: 640px) {
     .game-banner { font-size: 13px; padding: 8px 12px; }
     .deal-card .deal-header { flex-direction: column; align-items: flex-start; }
@@ -727,7 +563,7 @@
       <div class="subtitle">Расчёт личного денежного потока</div>
     </div>
     <div class="profession">
-      <label for="profession" style="color:var(--muted);font-size:14px;">Профессия:</label>
+      <label for="profession" class="profession-label">Профессия:</label>
       <select id="profession">
         <option value="custom">Свои данные</option>
         <optgroup label="Крысиные бега">
@@ -751,11 +587,11 @@
           <option value="developer">Разработчик</option>
         </optgroup>
       </select>
-      <button id="settings-btn" style="margin-left:8px;">⚙️ Настройки</button>
+      <button id="settings-btn">⚙️ Настройки</button>
     </div>
   </header>
   <div id="game-banner" class="game-banner rat-race">Крысиные бега: пассивный доход должен превысить расходы для побега</div>
-  <div class="escape-progress"><i id="escape-indicator" style="width:0%"></i></div>
+      <div class="escape-progress"><i id="escape-indicator"></i></div>
 
   <div class="grid">
     <section class="card col-12">
@@ -792,14 +628,14 @@
           <div class="change" id="change-net-worth"></div>
         </div>
       </div>
-      <div class="cash-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+      <div class="cash-actions">
         <button id="collect-cashflow">💰 Получить денежный поток</button>
         <button id="quit-job">🚪 Уволиться</button>
         <button id="add-cash">➕ Добавить наличность</button>
         <button id="remove-cash">➖ Удалить наличность</button>
       </div>
       <div class="bar-wrap">
-        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
+        <div class="bar-labels">
           <span>Расходы</span>
           <span>Доходы + Пассив</span>
         </div>
@@ -857,16 +693,16 @@
       </div>
     </section>
 
-    <section class="card col-12" id="deals-section" style="display:none">
+    <section class="card col-12 deals-section" id="deals-section">
       <h2>Инвестиционные сделки</h2>
       <div class="card-content">
-        <div class="grid" style="grid-template-columns: repeat(12, 1fr); gap: 16px;">
+        <div class="grid deals-grid">
           <div class="col-6">
-            <h3 style="margin:0 0 10px 0;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Малые сделки</h3>
+            <h3 class="deal-subtitle">Малые сделки</h3>
             <div id="small-deals-list"></div>
           </div>
           <div class="col-6">
-            <h3 style="margin:0 0 10px 0;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Крупные сделки</h3>
+            <h3 class="deal-subtitle">Крупные сделки</h3>
             <div id="big-deals-list"></div>
           </div>
         </div>
@@ -907,13 +743,13 @@
   <div id="buy-property-overlay" class="buy-property-overlay">
     <div class="buy-property-modal">
       <h2>🏠 Купить недвижимость</h2>
-      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+      <div class="row">
         <input type="text" id="prop-name" placeholder="Название недвижимости" inputmode="text" />
         <input type="number" id="prop-down" placeholder="Первый взнос (₽)" min="0" step="1" inputmode="numeric" />
         <input type="number" id="prop-mortgage" placeholder="Ипотека (₽)" min="0" step="1" inputmode="numeric" />
         <input type="number" id="prop-cashflow" placeholder="Денежный поток / мес (₽)" step="1" inputmode="numeric" />
       </div>
-      <div class="actions" style="justify-content:center;">
+      <div class="actions">
         <button class="primary" id="confirm-buy-property">Подтвердить покупку</button>
         <button id="cancel-buy-property">Отмена</button>
       </div>
@@ -923,7 +759,7 @@
   <div id="sell-property-overlay" class="sell-property-overlay">
     <div class="sell-property-modal">
       <h2>🏠 Продать недвижимость</h2>
-      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+      <div class="row">
         <input type="text" id="sell-prop-name" placeholder="Название недвижимости" inputmode="text" disabled />
         <input type="number" id="sell-prop-price" placeholder="Стоимость продажи (₽)" min="0" step="1" inputmode="numeric" />
       </div>
@@ -931,7 +767,7 @@
         <span>Наличные после продажи (с учетом ипотеки):</span>
         <span class="total-value" id="sell-prop-total-display">0 ₽</span>
       </div>
-      <div class="actions" style="justify-content:center;">
+      <div class="actions">
         <button class="primary" id="confirm-sell-property">Подтвердить продажу</button>
         <button id="cancel-sell-property">Отмена</button>
       </div>
@@ -941,13 +777,13 @@
   <div id="settings-overlay" class="settings-overlay">
     <div class="settings-modal">
       <h2>⚙️ Настройки игры</h2>
-      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
-        <label>Процент кредита (ежемесячный платёж)<br/><span style="font-size:12px;color:var(--muted)">Например: 10 означает 10% от суммы кредита в месяц</span></label>
+      <div class="row">
+        <label>Процент кредита (ежемесячный платёж)<br/><span class="hint-text">Например: 10 означает 10% от суммы кредита в месяц</span></label>
         <input type="number" id="setting-loan-rate" placeholder="%" min="0" step="1" inputmode="numeric" />
-        <label>Процент ипотеки (ежемесячный платёж)<br/><span style="font-size:12px;color:var(--muted)">Например: 0 означает без процентов</span></label>
+        <label>Процент ипотеки (ежемесячный платёж)<br/><span class="hint-text">Например: 0 означает без процентов</span></label>
         <input type="number" id="setting-mortgage-rate" placeholder="%" min="0" step="1" inputmode="numeric" />
       </div>
-      <div class="actions" style="justify-content:center;">
+      <div class="actions">
         <button class="primary" id="confirm-settings">Сохранить</button>
         <button id="cancel-settings">Отмена</button>
       </div>
@@ -957,7 +793,7 @@
   <div id="buy-stocks-overlay" class="buy-stocks-overlay">
     <div class="buy-stocks-modal">
       <h2>📈 Купить акции</h2>
-      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+      <div class="row">
         <input type="text" id="stock-name" placeholder="Название компании" inputmode="text" />
         <input type="number" id="stock-price" placeholder="Цена за акцию (₽)" min="0" step="1" inputmode="numeric" />
          <input type="number" id="stock-count" placeholder="Количество акций" step="1" inputmode="numeric" />
@@ -967,7 +803,7 @@
         <span>Итоговая сумма:</span>
         <span class="total-value" id="stock-total-display">0 ₽</span>
       </div>
-      <div class="actions" style="justify-content:center;">
+      <div class="actions">
         <button class="primary" id="confirm-buy-stocks">Подтвердить покупку</button>
         <button id="cancel-buy-stocks">Отмена</button>
       </div>
@@ -977,7 +813,7 @@
   <div id="sell-stocks-overlay" class="sell-stocks-overlay">
     <div class="sell-stocks-modal">
       <h2>📉 Продать акции</h2>
-      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+      <div class="row">
         <input type="text" id="sell-stock-name" placeholder="Название компании" inputmode="text" />
         <input type="number" id="sell-stock-price" placeholder="Цена за акцию (₽)" min="0" step="1" inputmode="numeric" />
          <input type="number" id="sell-stock-count" placeholder="Количество для продажи" step="1" inputmode="numeric" />
@@ -987,7 +823,7 @@
         <span>Итоговая сумма продажи:</span>
         <span class="total-value" id="sell-stock-total-display">0 ₽</span>
       </div>
-      <div class="actions" style="justify-content:center;">
+      <div class="actions">
         <button class="primary" id="confirm-sell-stocks">Подтвердить продажу</button>
         <button id="cancel-sell-stocks">Отмена</button>
       </div>
@@ -997,12 +833,12 @@
   <div id="take-loan-overlay" class="take-loan-overlay">
     <div class="take-loan-modal">
       <h2>🏦 Взять кредит</h2>
-      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+      <div class="row">
         <input type="text" id="loan-name" placeholder="Название кредита" inputmode="text" />
         <input type="number" id="loan-amount" placeholder="Сумма кредита (₽)" min="0" step="1" inputmode="numeric" />
         <input type="number" id="loan-payment" placeholder="Ежемесячный платёж (₽)" step="1" inputmode="numeric" />
       </div>
-      <div class="actions" style="justify-content:center;">
+      <div class="actions">
         <button class="primary" id="confirm-take-loan">Подтвердить</button>
         <button id="cancel-take-loan">Отмена</button>
       </div>
@@ -1012,7 +848,7 @@
   <div id="buy-asset-overlay" class="buy-asset-overlay">
     <div class="buy-asset-modal">
       <h2>💰 Купить актив</h2>
-      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+      <div class="row">
         <input type="text" id="asset-name" placeholder="Название актива" inputmode="text" />
         <input type="number" id="asset-price" placeholder="Стоимость актива (₽)" min="0" step="1" inputmode="numeric" />
       </div>
@@ -1020,7 +856,7 @@
         <span>Итоговая стоимость:</span>
         <span class="total-value" id="asset-total-display">0 ₽</span>
       </div>
-      <div class="actions" style="justify-content:center;">
+      <div class="actions">
         <button class="primary" id="confirm-buy-asset">Подтвердить покупку</button>
         <button id="cancel-buy-asset">Отмена</button>
       </div>
@@ -1030,7 +866,7 @@
   <div id="sell-asset-overlay" class="sell-asset-overlay">
     <div class="sell-asset-modal">
       <h2>💸 Продать актив</h2>
-      <div class="row" style="flex-direction:column;align-items:stretch;gap:12px;margin-bottom:14px;">
+      <div class="row">
         <input type="text" id="sell-asset-name" placeholder="Название актива" inputmode="text" />
         <input type="number" id="sell-asset-price" placeholder="Стоимость продажи (₽)" min="0" step="1" inputmode="numeric" />
       </div>
@@ -1038,7 +874,7 @@
         <span>Сумма продажи:</span>
         <span class="total-value" id="sell-asset-total-display">0 ₽</span>
       </div>
-      <div class="actions" style="justify-content:center;">
+      <div class="actions">
         <button class="primary" id="confirm-sell-asset">Подтвердить продажу</button>
         <button id="cancel-sell-asset">Отмена</button>
       </div>
@@ -1055,8 +891,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:600},{name:'Транспорт', value:300},
       {name:'Развлечения', value:200},{name:'Коммунальные', value:150}
     ],
-    assets: [{name:'Сбережения', value:1500},{name:'Акции', value:2000}],
-    liabilities: [{name:'Ипотека', value:120000, payment:1200},{name:'Автокредит', value:16000, payment:400},{name:'Кредитные карты', value:3000, payment:200}],
+    asset: [{name:'Сбережения', value:1500},{name:'Акции', value:2000}],
+    liability: [{name:'Ипотека', value:120000, payment:1200},{name:'Автокредит', value:16000, payment:400},{name:'Кредитные карты', value:3000, payment:200}],
     passive: []
   },
   doctor: {
@@ -1066,8 +902,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:1000},{name:'Транспорт', value:600},
       {name:'Развлечения', value:500},{name:'Коммунальные', value:400}
     ],
-    assets: [{name:'Сбережения', value:3000},{name:'Акции', value:10000},{name:'Фонды', value:15000}],
-    liabilities: [{name:'Ипотека', value:300000, payment:2500},{name:'Автокредит', value:35000, payment:800},{name:'Кредитные карты', value:8000, payment:600}],
+    asset: [{name:'Сбережения', value:3000},{name:'Акции', value:10000},{name:'Фонды', value:15000}],
+    liability: [{name:'Ипотека', value:300000, payment:2500},{name:'Автокредит', value:35000, payment:800},{name:'Кредитные карты', value:8000, payment:600}],
     passive: [{name:'Инвестиции', value:800}]
   },
   lawyer: {
@@ -1077,8 +913,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:800},{name:'Транспорт', value:400},
       {name:'Развлечения', value:400},{name:'Коммунальные', value:300}
     ],
-    assets: [{name:'Сбережения', value:5000},{name:'Акции', value:8000},{name:'Фонды', value:12000}],
-    liabilities: [{name:'Ипотека', value:250000, payment:2000},{name:'Автокредит', value:30000, payment:500}],
+    asset: [{name:'Сбережения', value:5000},{name:'Акции', value:8000},{name:'Фонды', value:12000}],
+    liability: [{name:'Ипотека', value:250000, payment:2000},{name:'Автокредит', value:30000, payment:500}],
     passive: [{name:'Дивиденды', value:600}]
   },
   manager: {
@@ -1088,8 +924,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:700},{name:'Транспорт', value:350},
       {name:'Развлечения', value:300},{name:'Коммунальные', value:200}
     ],
-    assets: [{name:'Сбережения', value:2000},{name:'Акции', value:5000}],
-    liabilities: [{name:'Ипотека', value:180000, payment:1500},{name:'Автокредит', value:20000, payment:350},{name:'Кредитные карты', value:4000, payment:250}],
+    asset: [{name:'Сбережения', value:2000},{name:'Акции', value:5000}],
+    liability: [{name:'Ипотека', value:180000, payment:1500},{name:'Автокредит', value:20000, payment:350},{name:'Кредитные карты', value:4000, payment:250}],
     passive: []
   },
   janitor: {
@@ -1098,8 +934,8 @@ const PROFESSIONS = {
       {name:'Налоги', value:400},{name:'Продукты', value:500},{name:'Транспорт', value:150},
       {name:'Развлечения', value:100},{name:'Коммунальные', value:120}
     ],
-    assets: [{name:'Сбережения', value:300}],
-    liabilities: [{name:'Кредитные карты', value:1500, payment:150}],
+    asset: [{name:'Сбережения', value:300}],
+    liability: [{name:'Кредитные карты', value:1500, payment:150}],
     passive: []
   },
   pilot: {
@@ -1109,8 +945,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:800},{name:'Транспорт', value:500},
       {name:'Развлечения', value:400},{name:'Коммунальные', value:300}
     ],
-    assets: [{name:'Сбережения', value:4000},{name:'Акции', value:7000}],
-    liabilities: [{name:'Ипотека', value:260000, payment:2200},{name:'Автокредит', value:28000, payment:600},{name:'Кредитные карты', value:5000, payment:400}],
+    asset: [{name:'Сбережения', value:4000},{name:'Акции', value:7000}],
+    liability: [{name:'Ипотека', value:260000, payment:2200},{name:'Автокредит', value:28000, payment:600},{name:'Кредитные карты', value:5000, payment:400}],
     passive: [{name:'Инвестиции', value:500}]
   },
   teacher: {
@@ -1120,8 +956,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:500},{name:'Транспорт', value:200},
       {name:'Развлечения', value:150},{name:'Коммунальные', value:150}
     ],
-    assets: [{name:'Сбережения', value:500},{name:'Фонды', value:1000}],
-    liabilities: [{name:'Ипотека', value:120000, payment:900},{name:'Автокредит', value:12000, payment:250}],
+    asset: [{name:'Сбережения', value:500},{name:'Фонды', value:1000}],
+    liability: [{name:'Ипотека', value:120000, payment:900},{name:'Автокредит', value:12000, payment:250}],
     passive: []
   },
   police: {
@@ -1131,8 +967,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:600},{name:'Транспорт', value:250},
       {name:'Развлечения', value:200},{name:'Коммунальные', value:180}
     ],
-    assets: [{name:'Сбережения', value:800},{name:'Акции', value:2000}],
-    liabilities: [{name:'Ипотека', value:140000, payment:1000},{name:'Автокредит', value:15000, payment:300}],
+    asset: [{name:'Сбережения', value:800},{name:'Акции', value:2000}],
+    liability: [{name:'Ипотека', value:140000, payment:1000},{name:'Автокредит', value:15000, payment:300}],
     passive: []
   },
   nurse: {
@@ -1142,8 +978,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:550},{name:'Транспорт', value:220},
       {name:'Развлечения', value:180},{name:'Коммунальные', value:160}
     ],
-    assets: [{name:'Сбережения', value:600},{name:'Фонды', value:1500}],
-    liabilities: [{name:'Ипотека', value:130000, payment:850},{name:'Автокредит', value:14000, payment:280}],
+    asset: [{name:'Сбережения', value:600},{name:'Фонды', value:1500}],
+    liability: [{name:'Ипотека', value:130000, payment:850},{name:'Автокредит', value:14000, payment:280}],
     passive: []
   },
   mechanic: {
@@ -1152,8 +988,8 @@ const PROFESSIONS = {
       {name:'Налоги', value:1000},{name:'Продукты', value:600},
       {name:'Транспорт', value:250},{name:'Развлечения', value:200},{name:'Коммунальные', value:170}
     ],
-    assets: [{name:'Сбережения', value:700},{name:'Акции', value:2500}],
-    liabilities: [{name:'Ипотека', value:140000, payment:900},{name:'Автокредит', value:16000, payment:300}],
+    asset: [{name:'Сбережения', value:700},{name:'Акции', value:2500}],
+    liability: [{name:'Ипотека', value:140000, payment:900},{name:'Автокредит', value:16000, payment:300}],
     passive: []
   },
   business_manager: {
@@ -1163,8 +999,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:650},{name:'Транспорт', value:350},
       {name:'Развлечения', value:300},{name:'Коммунальные', value:250}
     ],
-    assets: [{name:'Сбережения', value:1500},{name:'Акции', value:2500}],
-    liabilities: [{name:'Ипотека', value:160000, payment:1100},{name:'Автокредит', value:18000, payment:400},{name:'Кредитные карты', value:3000, payment:250}],
+    asset: [{name:'Сбережения', value:1500},{name:'Акции', value:2500}],
+    liability: [{name:'Ипотека', value:160000, payment:1100},{name:'Автокредит', value:18000, payment:400},{name:'Кредитные карты', value:3000, payment:250}],
     passive: []
   },
   secretary: {
@@ -1174,8 +1010,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:500},{name:'Транспорт', value:200},
       {name:'Развлечения', value:150},{name:'Коммунальные', value:120}
     ],
-    assets: [{name:'Сбережения', value:400},{name:'Акции', value:800}],
-    liabilities: [{name:'Автокредит', value:10000, payment:250},{name:'Кредитные карты', value:2000, payment:200}],
+    asset: [{name:'Сбережения', value:400},{name:'Акции', value:800}],
+    liability: [{name:'Автокредит', value:10000, payment:250},{name:'Кредитные карты', value:2000, payment:200}],
     passive: []
   },
   truck_driver: {
@@ -1185,8 +1021,8 @@ const PROFESSIONS = {
       {name:'Продукты', value:500},{name:'Транспорт', value:300},
       {name:'Развлечения', value:150},{name:'Коммунальные', value:100}
     ],
-    assets: [{name:'Сбережения', value:300}],
-    liabilities: [{name:'Автокредит', value:12000, payment:400},{name:'Кредитные карты', value:1500, payment:150}],
+    asset: [{name:'Сбережения', value:300}],
+    liability: [{name:'Автокредит', value:12000, payment:400},{name:'Кредитные карты', value:1500, payment:150}],
     passive: []
   }
 };
@@ -1199,8 +1035,8 @@ const FAST_TRACK_PROFESSIONS = {
       {name:'Продукты', value:3000},{name:'Транспорт', value:1500},
       {name:'Развлечения', value:2000},{name:'Коммунальные', value:1000}
     ],
-    assets: [{name:'Сбережения', value:50000},{name:'Акции', value:200000},{name:'Фонды', value:300000},{name:'Недвижимость', value:500000}],
-    liabilities: [{name:'Ипотека', value:2000000, payment:8000},{name:'Автокредит', value:200000, payment:2000},{name:'Кредитные карты', value:50000, payment:1000}],
+    asset: [{name:'Сбережения', value:50000},{name:'Акции', value:200000},{name:'Фонды', value:300000},{name:'Недвижимость', value:500000}],
+    liability: [{name:'Ипотека', value:2000000, payment:8000},{name:'Автокредит', value:200000, payment:2000},{name:'Кредитные карты', value:50000, payment:1000}],
     passive: [{name:'Дивиденды', value:15000},{name:'Рентный доход', value:8000}]
   },
   entrepreneur: {
@@ -1211,8 +1047,8 @@ const FAST_TRACK_PROFESSIONS = {
       {name:'Продукты', value:4000},{name:'Транспорт', value:3000},
       {name:'Развлечения', value:3000},{name:'Коммунальные', value:2000}
     ],
-    assets: [{name:'Сбережения', value:100000},{name:'Бизнес', value:1000000},{name:'Акции', value:500000},{name:'Недвижимость', value:800000}],
-    liabilities: [{name:'Бизнес-кредит', value:3000000, payment:5000},{name:'Ипотека', value:1500000}],
+    asset: [{name:'Сбережения', value:100000},{name:'Бизнес', value:1000000},{name:'Акции', value:500000},{name:'Недвижимость', value:800000}],
+    liability: [{name:'Бизнес-кредит', value:3000000, payment:5000},{name:'Ипотека', value:1500000}],
     passive: [{name:'Бизнес-доход', value:35000},{name:'Дивиденды', value:12000}]
   },
   developer: {
@@ -1222,8 +1058,8 @@ const FAST_TRACK_PROFESSIONS = {
       {name:'Продукты', value:2500},{name:'Транспорт', value:1200},
       {name:'Развлечения', value:2000},{name:'Коммунальные', value:800}
     ],
-    assets: [{name:'Сбережения', value:80000},{name:'Акции', value:150000},{name:'Крипта', value:100000},{name:'Недвижимость', value:400000}],
-    liabilities: [{name:'Ипотека', value:1200000, payment:6000},{name:'Автокредит', value:100000, payment:1500}],
+    asset: [{name:'Сбережения', value:80000},{name:'Акции', value:150000},{name:'Крипта', value:100000},{name:'Недвижимость', value:400000}],
+    liability: [{name:'Ипотека', value:1200000, payment:6000},{name:'Автокредит', value:100000, payment:1500}],
     passive: [{name:'Дивиденды', value:10000},{name:'Фриланс', value:8000}]
   }
 };
@@ -1328,11 +1164,11 @@ function fmt(n) {
 
 function rowHTML(name='', value='', isCurrency=false, diffClass='', removed=false) {
   const diffCls = diffClass ? ` ${diffClass}` : '';
-  const removedStyle = removed ? 'style="opacity: 0.5; pointer-events: none;"' : '';
-  return `<div class="row${diffCls}" ${removedStyle}>
+  const removedCls = removed ? ' row-removed' : '';
+  return `<div class="row${diffCls}${removedCls}">
     <input type="text" class="rname" placeholder="Название" value="${name}" inputmode="text" ${removed ? 'disabled' : ''} />
     <input type="number" class="rvalue" placeholder="0" value="${value}" step="1" inputmode="numeric" ${removed ? 'disabled' : ''} />
-    <button class="remove" title="Удалить" aria-label="Удалить" ${removed ? 'style="display:none;"' : ''}>✕</button>
+    <button class="remove" title="Удалить" aria-label="Удалить" ${removed ? 'class="remove btn-hidden"' : ''}>✕</button>
   </div>`;
 }
 
@@ -1355,12 +1191,12 @@ function renderSection(section) {
       const diffClass = getRowDiffClass(section, idx);
       const diffCls = diffClass ? ` ${diffClass}` : '';
       const removed = item._removed;
-      const removedStyle = removed ? 'style="opacity: 0.5;"' : '';
-      return `<div class="row${diffCls}" ${removedStyle}>
+      const removedCls = removed ? ' row-removed' : '';
+      return `<div class="row${diffCls}${removedCls}">
         <input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" ${removed ? 'disabled' : ''} />
         <span class="rpayment">${fmt(Number(item.payment) || 0)}</span>
         <span class="rvalue">${fmt(Number(item.value) || 0)}</span>
-        <button class="remove" title="Удалить" aria-label="Удалить" ${removed ? 'style="display:none;"' : ''}>✕</button>
+        <button class="remove" title="Удалить" aria-label="Удалить" ${removed ? 'class="remove btn-hidden"' : ''}>✕</button>
       </div>`;
     }).join('');
     
@@ -1399,11 +1235,11 @@ function renderSection(section) {
       const diffClass = getRowDiffClass(section, idx);
       const diffCls = diffClass ? ` ${diffClass}` : '';
       const removed = item._removed;
-      const removedStyle = removed ? 'style="opacity: 0.5;"' : '';
-      return `<div class="row${diffCls}" ${removedStyle}>
+      const removedCls = removed ? ' row-removed' : '';
+      return `<div class="row${diffCls}${removedCls}">
         <input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" ${removed ? 'disabled' : ''} />
         <span class="rvalue">${fmt(Number(item.value) || 0)}</span>
-        <button class="sell-asset" data-idx="${idx}" title="Продать" aria-label="Продать" ${removed ? 'style="display:none;"' : ''}>Продать</button>
+        <button class="sell-asset" data-idx="${idx}" title="Продать" aria-label="Продать" ${removed ? 'class="sell-asset btn-hidden"' : ''}>Продать</button>
       </div>`;
     }).join('');
     
@@ -1469,14 +1305,14 @@ function renderStocks() {
     const status = removed ? 'removed' : getDiffStatus('stocks', stock, idx);
     const diffClass = status === 'added' ? 'stock-row-diff-added' : status === 'removed' ? 'stock-row-diff-removed' : status === 'modified' ? 'stock-row-diff-modified' : '';
     const diffCls = diffClass ? ` ${diffClass}` : '';
-    const removedStyle = removed ? 'style="opacity: 0.5;"' : '';
-    return `<div class="stock-row${diffCls}" ${removedStyle}>
+    const removedCls = removed ? ' stock-row-removed' : '';
+    return `<div class="stock-row${diffCls}${removedCls}">
       <div class="stock-name">${stock.name}</div>
       <div class="stock-price">${fmt(Number(stock.price) || 0)}</div>
       <div class="stock-count">${Number(stock.count) || 0}</div>
       <div class="stock-total">${fmt(total)}</div>
-      <button class="stock-buy" title="Купить" aria-label="Купить" ${removed ? 'style="display:none;"' : ''}>Купить</button>
-      <button class="stock-sell" title="Продать" aria-label="Продать" ${removed ? 'style="display:none;"' : ''}>Продать</button>
+      <button class="stock-buy" title="Купить" aria-label="Купить" ${removed ? 'class="stock-buy btn-hidden"' : ''}>Купить</button>
+      <button class="stock-sell" title="Продать" aria-label="Продать" ${removed ? 'class="stock-sell btn-hidden"' : ''}>Продать</button>
     </div>`;
   }).join('');
 
@@ -1489,23 +1325,6 @@ function renderStocks() {
     buyBtn.addEventListener('click', () => openBuyStocks(idx));
     sellBtn.addEventListener('click', () => openSellStocks(idx));
   });
-}
-
-function updateStockTotal(row, stock) {
-  const total = (Number(stock.price) || 0) * (Number(stock.count) || 0);
-  row.querySelector('.stock-total').textContent = fmt(total);
-}
-
-function syncLinked(sourceSection, removedName) {
-  if (!removedName) return;
-  const linked = sourceSection === 'expense' ? 'liability' : sourceSection === 'liability' ? 'expense' : null;
-  if (!linked) return;
-  const idx = pending[linked].findIndex(item => item.name === removedName);
-  if (idx !== -1) {
-    pending[linked][idx]._removed = true;
-    renderSection(linked);
-    updateSummary(pending);
-  }
 }
 
 function syncLiabilityExpense(item) {
@@ -1586,6 +1405,10 @@ function removeCash() {
   saveState();
 }
 
+function closeModal(id) {
+  document.getElementById(id).classList.remove('visible');
+}
+
 function takeLoanModal() {
   document.getElementById('loan-name').value = '';
   document.getElementById('loan-amount').value = '';
@@ -1633,7 +1456,7 @@ function confirmTakeLoan() {
 }
 
 function cancelTakeLoan() {
-  document.getElementById('take-loan-overlay').classList.remove('visible');
+  closeModal('take-loan-overlay');
 }
 
 let buyAssetIndex = -1;
@@ -1692,7 +1515,7 @@ function confirmBuyAsset() {
 }
 
 function cancelBuyAsset() {
-  document.getElementById('buy-asset-overlay').classList.remove('visible');
+  closeModal('buy-asset-overlay');
   buyAssetIndex = -1;
 }
 
@@ -1741,7 +1564,7 @@ function confirmSellAsset() {
 }
 
 function cancelSellAsset() {
-  document.getElementById('sell-asset-overlay').classList.remove('visible');
+  closeModal('sell-asset-overlay');
   sellAssetIndex = -1;
 }
 
@@ -1752,13 +1575,13 @@ function renderProperties() {
     const status = removed ? 'removed' : getDiffStatus('property', prop, idx);
     const diffClass = status === 'added' ? 'stock-row-diff-added' : status === 'removed' ? 'stock-row-diff-removed' : status === 'modified' ? 'stock-row-diff-modified' : '';
     const diffCls = diffClass ? ` ${diffClass}` : '';
-    const removedStyle = removed ? 'style="opacity: 0.5;"' : '';
-    return `<div class="stock-row${diffCls}" ${removedStyle}>
+    const removedCls = removed ? ' stock-row-removed' : '';
+    return `<div class="stock-row${diffCls}${removedCls}">
       <div class="stock-name">${prop.name}</div>
       <div class="stock-price">${fmt(Number(prop.down) || 0)}</div>
       <div class="stock-count">${fmt(Number(prop.mortgage) || 0)}</div>
       <div class="stock-total">${fmt(Number(prop.cashflow) || 0)}</div>
-      <button class="stock-sell" title="Продать" aria-label="Продать" ${removed ? 'style="display:none;"' : ''}>Продать</button>
+      <button class="stock-sell" title="Продать" aria-label="Продать" ${removed ? 'class="stock-sell btn-hidden"' : ''}>Продать</button>
     </div>`;
   }).join('');
 
@@ -1826,7 +1649,7 @@ function confirmSellProperty() {
 }
 
 function cancelSellProperty() {
-  document.getElementById('sell-property-overlay').classList.remove('visible');
+  closeModal('sell-property-overlay');
   sellPropertyIndex = -1;
 }
 
@@ -1847,7 +1670,7 @@ function confirmSettings() {
 }
 
 function cancelSettings() {
-  document.getElementById('settings-overlay').classList.remove('visible');
+  closeModal('settings-overlay');
 }
 
 function buyProperty() {
@@ -1925,26 +1748,26 @@ function confirmBuyProperty() {
 }
 
 function cancelBuyProperty() {
-  document.getElementById('buy-property-overlay').classList.remove('visible');
+  closeModal('buy-property-overlay');
 }
 
-function updateStockFormTotal() {
-  const price = Math.max(0, Number(document.getElementById('stock-price').value) || 0);
-  const count = Math.max(0, Number(document.getElementById('stock-count').value) || 0);
-  const totalField = document.getElementById('stock-total');
-  const totalDisplay = document.getElementById('stock-total-display');
+function updateStockFormTotal(prefix = '') {
+  const price = Math.max(0, Number(document.getElementById(prefix + 'stock-price').value) || 0);
+  const count = Math.max(0, Number(document.getElementById(prefix + 'stock-count').value) || 0);
+  const totalField = document.getElementById(prefix + 'stock-total');
+  const totalDisplay = document.getElementById(prefix + 'stock-total-display');
   const active = document.activeElement;
 
-  if (active && active.id === 'stock-count') {
+  if (active && active.id === prefix + 'stock-count') {
     const newTotal = price * count;
     totalField.value = newTotal;
     totalDisplay.textContent = fmt(newTotal);
-  } else if (active && active.id === 'stock-total') {
+  } else if (active && active.id === prefix + 'stock-total') {
     const total = Math.max(0, Number(totalField.value) || 0);
     const newCount = price > 0 ? Math.floor(total / price) : 0;
-    document.getElementById('stock-count').value = newCount;
+    document.getElementById(prefix + 'stock-count').value = newCount;
     totalDisplay.textContent = fmt(total);
-  } else if (active && active.id === 'stock-price') {
+  } else if (active && active.id === prefix + 'stock-price') {
     if (count > 0) {
       const newTotal = price * count;
       totalField.value = newTotal;
@@ -1952,7 +1775,7 @@ function updateStockFormTotal() {
     } else {
       const total = Math.max(0, Number(totalField.value) || 0);
       const newCount = price > 0 ? Math.floor(total / price) : 0;
-      document.getElementById('stock-count').value = newCount;
+      document.getElementById(prefix + 'stock-count').value = newCount;
     }
   } else {
     totalDisplay.textContent = fmt(price * count);
@@ -1996,7 +1819,8 @@ function confirmBuyStocks() {
 }
 
 function cancelBuyStocks() {
-  document.getElementById('buy-stocks-overlay').classList.remove('visible');
+  closeModal('buy-stocks-overlay');
+  buyStockIndex = -1;
 }
 
 let sellStockIndex = -1;
@@ -2008,42 +1832,9 @@ function openSellStocks(idx) {
   document.getElementById('sell-stock-name').value = stock.name;
   document.getElementById('sell-stock-price').value = stock.price;
   document.getElementById('sell-stock-count').value = stock.count;
-  updateSellFormTotal();
+  updateStockFormTotal('sell-');
   document.getElementById('sell-stocks-overlay').classList.add('visible');
   document.getElementById('sell-stock-price').focus();
-}
-
-function updateSellFormTotal() {
-  const price = Math.max(0, Number(document.getElementById('sell-stock-price').value) || 0);
-  const count = Math.max(0, Number(document.getElementById('sell-stock-count').value) || 0);
-  const totalField = document.getElementById('sell-stock-total');
-  const totalDisplay = document.getElementById('sell-stock-total-display');
-  const active = document.activeElement;
-
-  if (active && active.id === 'sell-stock-count') {
-    const newTotal = price * count;
-    totalField.value = newTotal;
-    totalDisplay.textContent = fmt(newTotal);
-  } else if (active && active.id === 'sell-stock-total') {
-    const total = Math.max(0, Number(totalField.value) || 0);
-    const newCount = price > 0 ? Math.floor(total / price) : 0;
-    document.getElementById('sell-stock-count').value = newCount;
-    totalDisplay.textContent = fmt(total);
-  } else if (active && active.id === 'sell-stock-price') {
-    if (count > 0) {
-      const newTotal = price * count;
-      totalField.value = newTotal;
-      totalDisplay.textContent = fmt(newTotal);
-    } else {
-      const total = Math.max(0, Number(totalField.value) || 0);
-      const newCount = price > 0 ? Math.floor(total / price) : 0;
-      document.getElementById('sell-stock-count').value = newCount;
-    }
-  } else {
-    const total = price * count;
-    totalField.value = total;
-    totalDisplay.textContent = fmt(total);
-  }
 }
 
 function confirmSellStocks() {
@@ -2085,7 +1876,7 @@ function confirmSellStocks() {
 }
 
 function cancelSellStocks() {
-  document.getElementById('sell-stocks-overlay').classList.remove('visible');
+  closeModal('sell-stocks-overlay');
   sellStockIndex = -1;
 }
 
@@ -2317,41 +2108,34 @@ function updateChangeIndicator(elementId, newValue, oldValue, type) {
   const isGood = (type === 'income' && diff > 0) || (type === 'expense' && diff < 0) || (type === 'neutral' && diff > 0);
   const colorClass = isGood ? 'positive' : 'negative';
   
-  el.innerHTML = `${fmt(oldValue)} <span style="color:${isGood ? 'var(--green)' : 'var(--red)'}">${sign}${fmt(diff)}</span> = ${fmt(newValue)}`;
+  el.innerHTML = `${fmt(oldValue)} <span class="${isGood ? 'change-good' : 'change-bad'}">${sign}${fmt(diff)}</span> = ${fmt(newValue)}`;
   el.className = 'change ' + colorClass;
+}
+
+function sectionHasChanges(section) {
+  let cItems, pItems;
+  if (section === 'property') {
+    cItems = committed.property || [];
+    pItems = pending.property || [];
+  } else if (section === 'stocks') {
+    cItems = committed.stocks || [];
+    pItems = pending.stocks || [];
+  } else {
+    cItems = committed[section];
+    pItems = pending[section];
+  }
+  const pActive = pItems.filter(p => !p._removed);
+  if (cItems.length !== pActive.length) return true;
+  for (let i = 0; i < pActive.length; i++) {
+    if (getDiffStatus(section, pActive[i], i) !== null) return true;
+  }
+  return pItems.some(p => p._removed);
 }
 
 function hasChanges() {
   const sections = Object.keys(sectionMeta);
   for (const section of sections) {
-    if (section === 'property') {
-      const cProps = committed.property || [];
-      const pProps = pending.property || [];
-      const pActive = pProps.filter(p => !p._removed);
-      if (cProps.length !== pActive.length) return true;
-      for (let i = 0; i < pActive.length; i++) {
-        if (getDiffStatus(section, pActive[i], i) !== null) return true;
-      }
-      if (pProps.some(p => p._removed)) return true;
-    } else if (section === 'stocks') {
-      const cStocks = committed.stocks || [];
-      const pStocks = pending.stocks || [];
-      const pActive = pStocks.filter(p => !p._removed);
-      if (cStocks.length !== pActive.length) return true;
-      for (let i = 0; i < pActive.length; i++) {
-        if (getDiffStatus(section, pActive[i], i) !== null) return true;
-      }
-      if (pStocks.some(p => p._removed)) return true;
-    } else {
-      const cItems = committed[section];
-      const pItems = pending[section];
-      const pActive = pItems.filter(p => !p._removed);
-      if (cItems.length !== pActive.length) return true;
-      for (let i = 0; i < pActive.length; i++) {
-        if (getDiffStatus(section, pActive[i], i) !== null) return true;
-      }
-      if (pItems.some(p => p._removed)) return true;
-    }
+    if (sectionHasChanges(section)) return true;
   }
   return committed.cashOnHand !== pending.cashOnHand;
 }
@@ -2373,50 +2157,7 @@ function updateSectionHighlights() {
     const card = document.getElementById(meta.id).closest('.card');
     if (!card) continue;
     
-    let hasSectionChanges = false;
-    
-    if (section === 'property') {
-      const cProps = committed.property || [];
-      const pProps = pending.property || [];
-      const pActive = pProps.filter(p => !p._removed);
-      hasSectionChanges = cProps.length !== pActive.length || pProps.some(p => p._removed);
-      if (!hasSectionChanges) {
-        for (let i = 0; i < pActive.length; i++) {
-          if (getDiffStatus(section, pActive[i], i) !== null) {
-            hasSectionChanges = true;
-            break;
-          }
-        }
-      }
-    } else if (section === 'stocks') {
-      const cStocks = committed.stocks || [];
-      const pStocks = pending.stocks || [];
-      const pActive = pStocks.filter(p => !p._removed);
-      hasSectionChanges = cStocks.length !== pActive.length || pStocks.some(p => p._removed);
-      if (!hasSectionChanges) {
-        for (let i = 0; i < pActive.length; i++) {
-          if (getDiffStatus(section, pActive[i], i) !== null) {
-            hasSectionChanges = true;
-            break;
-          }
-        }
-      }
-    } else {
-      const cItems = committed[section];
-      const pItems = pending[section];
-      const pActive = pItems.filter(p => !p._removed);
-      hasSectionChanges = cItems.length !== pActive.length || pItems.some(p => p._removed);
-      if (!hasSectionChanges) {
-        for (let i = 0; i < pActive.length; i++) {
-          if (getDiffStatus(section, pActive[i], i) !== null) {
-            hasSectionChanges = true;
-            break;
-          }
-        }
-      }
-    }
-    
-    if (hasSectionChanges) {
+    if (sectionHasChanges(section)) {
       card.classList.add('has-changes');
     } else {
       card.classList.remove('has-changes');
@@ -2467,122 +2208,63 @@ function revert() {
   saveState();
 }
 
-function getDiffStatus(section, item, idx) {
-  const committedItems = committed[section];
-  const pendingItems = (pending[section] || []).filter(i => !i._removed);
+function diffMatchLists(a, b, areEqual) {
+  const aUsed = new Array(a.length).fill(false);
+  const bUsed = new Array(b.length).fill(false);
 
-  if (section === 'stocks') {
-    const cStocks = committed.stocks || [];
-    const pStocks = (pending.stocks || []).filter(i => !i._removed);
-    const cUsed = new Array(cStocks.length).fill(false);
-    const pUsed = new Array(pStocks.length).fill(false);
-
-    for (let pi = 0; pi < pStocks.length; pi++) {
-      for (let ci = 0; ci < cStocks.length; ci++) {
-        if (!cUsed[ci] && !pUsed[pi] && cStocks[ci].name === pStocks[pi].name && cStocks[ci].price * cStocks[ci].count === pStocks[pi].price * pStocks[pi].count) {
-          cUsed[ci] = true;
-          pUsed[pi] = true;
-          break;
-        }
-      }
-    }
-
-    const pStatuses = new Array(pStocks.length).fill(null);
-    for (let pi = 0; pi < pStocks.length; pi++) {
-      if (pUsed[pi]) continue;
-      let found = false;
-      for (let ci = 0; ci < cStocks.length; ci++) {
-        if (!cUsed[ci] && cStocks[ci].name === pStocks[pi].name) {
-          cUsed[ci] = true;
-          pUsed[pi] = true;
-          pStatuses[pi] = 'modified';
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        pStatuses[pi] = 'added';
-      }
-    }
-
-    const actualIdx = (pending.stocks || []).filter(i => !i._removed).indexOf(item);
-    return actualIdx >= 0 && actualIdx < pStatuses.length ? pStatuses[actualIdx] : null;
-  }
-
-  if (section === 'property') {
-    const cProps = committed.property || [];
-    const pProps = (pending.property || []).filter(i => !i._removed);
-    const cUsed = new Array(cProps.length).fill(false);
-    const pUsed = new Array(pProps.length).fill(false);
-
-    for (let pi = 0; pi < pProps.length; pi++) {
-      for (let ci = 0; ci < cProps.length; ci++) {
-        if (!cUsed[ci] && !pUsed[pi] && cProps[ci].name === pProps[pi].name &&
-            (Number(cProps[ci].down)||0) === (Number(pProps[pi].down)||0) &&
-            (Number(cProps[ci].mortgage)||0) === (Number(pProps[pi].mortgage)||0) &&
-            (Number(cProps[ci].cashflow)||0) === (Number(pProps[pi].cashflow)||0)) {
-          cUsed[ci] = true;
-          pUsed[pi] = true;
-          break;
-        }
-      }
-    }
-
-    const pStatuses = new Array(pProps.length).fill(null);
-    for (let pi = 0; pi < pProps.length; pi++) {
-      if (pUsed[pi]) continue;
-      let found = false;
-      for (let ci = 0; ci < cProps.length; ci++) {
-        if (!cUsed[ci] && cProps[ci].name === pProps[pi].name) {
-          cUsed[ci] = true;
-          pUsed[pi] = true;
-          pStatuses[pi] = 'modified';
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        pStatuses[pi] = 'added';
-      }
-    }
-
-    const actualIdx = (pending.property || []).filter(i => !i._removed).indexOf(item);
-    return actualIdx >= 0 && actualIdx < pStatuses.length ? pStatuses[actualIdx] : null;
-  }
-
-  const cUsed = new Array(committedItems.length).fill(false);
-  const pUsed = new Array(pendingItems.length).fill(false);
-
-  for (let pi = 0; pi < pendingItems.length; pi++) {
-    for (let ci = 0; ci < committedItems.length; ci++) {
-      if (!cUsed[ci] && !pUsed[pi] && committedItems[ci].name === pendingItems[pi].name && committedItems[ci].value === pendingItems[pi].value) {
-        cUsed[ci] = true;
-        pUsed[pi] = true;
+  for (let bi = 0; bi < b.length; bi++) {
+    for (let ai = 0; ai < a.length; ai++) {
+      if (!aUsed[ai] && !bUsed[bi] && areEqual(a[ai], b[bi])) {
+        aUsed[ai] = true;
+        bUsed[bi] = true;
         break;
       }
     }
   }
 
-  const pStatuses = new Array(pendingItems.length).fill(null);
-  for (let pi = 0; pi < pendingItems.length; pi++) {
-    if (pUsed[pi]) continue;
+  const bStatuses = new Array(b.length).fill(null);
+  for (let bi = 0; bi < b.length; bi++) {
+    if (bUsed[bi]) continue;
     let found = false;
-    for (let ci = 0; ci < committedItems.length; ci++) {
-      if (!cUsed[ci] && committedItems[ci].name === pendingItems[pi].name) {
-        cUsed[ci] = true;
-        pUsed[pi] = true;
-        pStatuses[pi] = 'modified';
+    for (let ai = 0; ai < a.length; ai++) {
+      if (!aUsed[ai] && a[ai].name === b[bi].name) {
+        aUsed[ai] = true;
+        bUsed[bi] = true;
+        bStatuses[bi] = 'modified';
         found = true;
         break;
       }
     }
     if (!found) {
-      pStatuses[pi] = 'added';
+      bStatuses[bi] = 'added';
     }
   }
 
-  const actualIdx = pendingItems.indexOf(item);
-  return actualIdx >= 0 && actualIdx < pStatuses.length ? pStatuses[actualIdx] : null;
+  return bStatuses;
+}
+
+function getDiffStatus(section, item, idx) {
+  const committedItems = committed[section];
+  const pendingItems = (pending[section] || []).filter(i => !i._removed);
+
+  let cItems, pItems, areEqual;
+  if (section === 'stocks') {
+    cItems = committed.stocks || [];
+    pItems = (pending.stocks || []).filter(i => !i._removed);
+    areEqual = (c, p) => c.name === p.name && c.price * c.count === p.price * p.count;
+  } else if (section === 'property') {
+    cItems = committed.property || [];
+    pItems = (pending.property || []).filter(i => !i._removed);
+    areEqual = (c, p) => c.name === p.name && (Number(c.down)||0) === (Number(p.down)||0) && (Number(c.mortgage)||0) === (Number(p.mortgage)||0) && (Number(c.cashflow)||0) === (Number(p.cashflow)||0);
+  } else {
+    cItems = committedItems;
+    pItems = pendingItems;
+    areEqual = (c, p) => c.name === p.name && c.value === p.value;
+  }
+
+  const statuses = diffMatchLists(cItems, pItems, areEqual);
+  const actualIdx = pItems.indexOf(item);
+  return actualIdx >= 0 && actualIdx < statuses.length ? statuses[actualIdx] : null;
 }
 
 
@@ -2593,9 +2275,9 @@ function loadProfession(key) {
   const base = {
     income: p.income.map(i=>({...i})),
     expense: p.expense.map(i=>({...i})),
-    asset: p.assets.map(i=>({...i})),
-    liability: p.liabilities.map(i=>({...i})),
-    passive: p.passive ? p.passive.map(i=>({...i})) : [],
+    asset: p.asset.map(i=>({...i})),
+    liability: p.liability.map(i=>({...i})),
+    passive: p.passive.map(i=>({...i})),
     stocks: [],
     property: [],
     cashOnHand: 0
@@ -2664,9 +2346,9 @@ document.getElementById('stock-count').addEventListener('input', updateStockForm
 document.getElementById('stock-total').addEventListener('input', updateStockFormTotal);
 document.getElementById('confirm-sell-stocks').addEventListener('click', confirmSellStocks);
 document.getElementById('cancel-sell-stocks').addEventListener('click', cancelSellStocks);
-document.getElementById('sell-stock-price').addEventListener('input', updateSellFormTotal);
-document.getElementById('sell-stock-count').addEventListener('input', updateSellFormTotal);
-document.getElementById('sell-stock-total').addEventListener('input', updateSellFormTotal);
+document.getElementById('sell-stock-price').addEventListener('input', () => updateStockFormTotal('sell-'));
+document.getElementById('sell-stock-count').addEventListener('input', () => updateStockFormTotal('sell-'));
+document.getElementById('sell-stock-total').addEventListener('input', () => updateStockFormTotal('sell-'));
 
 document.getElementById('confirm-buy-asset').addEventListener('click', confirmBuyAsset);
 document.getElementById('cancel-buy-asset').addEventListener('click', cancelBuyAsset);
