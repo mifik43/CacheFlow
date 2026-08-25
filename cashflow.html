@@ -84,6 +84,36 @@
     border-color: var(--amber);
     box-shadow: 0 0 0 1px var(--amber), 0 0 12px rgba(251,191,36,0.15);
   }
+  .card.collapsed .card-content {
+    display: none;
+  }
+  .card.collapsed {
+    padding-bottom: 12px;
+  }
+  .card h2 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card h2::after {
+    content: '▼';
+    font-size: 10px;
+    transition: transform 0.2s;
+    margin-left: 8px;
+  }
+  .card.collapsed h2::after {
+    transform: rotate(-90deg);
+  }
+  .card h2:hover {
+    color: var(--accent);
+  }
   .col-12 { grid-column: span 12; }
   .col-6  { grid-column: span 6; }
   .col-4  { grid-column: span 4; }
@@ -781,58 +811,74 @@
 
     <section class="card col-12">
       <h2>Доходы (в месяц)</h2>
-      <div id="income-rows"></div>
-      <button class="category-add" data-section="income">+ Добавить доход</button>
+      <div class="card-content">
+        <div id="income-rows"></div>
+        <button class="category-add" data-section="income">+ Добавить доход</button>
+      </div>
     </section>
 
     <section class="card col-6">
       <h2>Расходы (в месяц)</h2>
-      <div id="expense-rows"></div>
-      <button class="category-add" data-section="expense">+ Добавить расход</button>
+      <div class="card-content">
+        <div id="expense-rows"></div>
+        <button class="category-add" data-section="expense">+ Добавить расход</button>
+      </div>
     </section>
 
     <section class="card col-6">
       <h2>Сбережения / Активы</h2>
-      <div id="asset-rows"></div>
-      <button class="category-add" data-section="asset">+ Добавить актив</button>
+      <div class="card-content">
+        <div id="asset-rows"></div>
+        <button class="category-add" data-section="asset">+ Добавить актив</button>
+      </div>
     </section>
 
     <section class="card col-6">
       <h2>Акции</h2>
-      <div id="stocks-rows"></div>
-      <button class="category-add" data-section="stocks">+ Купить акции</button>
+      <div class="card-content">
+        <div id="stocks-rows"></div>
+        <button class="category-add" data-section="stocks">+ Купить акции</button>
+      </div>
     </section>
 
     <section class="card col-6">
       <h2>Недвижимость</h2>
-      <div id="property-rows"></div>
-      <button class="category-add" data-section="property">+ Купить недвижимость</button>
+      <div class="card-content">
+        <div id="property-rows"></div>
+        <button class="category-add" data-section="property">+ Купить недвижимость</button>
+      </div>
     </section>
 
     <section class="card col-6">
       <h2>Пассивы (обязательства)</h2>
-      <div id="liability-rows"></div>
-      <button class="category-add" data-section="liability">+ Взять кредит</button>
+      <div class="card-content">
+        <div id="liability-rows"></div>
+        <button class="category-add" data-section="liability">+ Взять кредит</button>
+      </div>
     </section>
 
     <section class="card col-12" id="deals-section" style="display:none">
       <h2>Инвестиционные сделки</h2>
-      <div class="grid" style="grid-template-columns: repeat(12, 1fr); gap: 16px;">
-        <div class="col-6">
-          <h3 style="margin:0 0 10px 0;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Малые сделки</h3>
-          <div id="small-deals-list"></div>
-        </div>
-        <div class="col-6">
-          <h3 style="margin:0 0 10px 0;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Крупные сделки</h3>
-          <div id="big-deals-list"></div>
+      <div class="card-content">
+        <div class="grid" style="grid-template-columns: repeat(12, 1fr); gap: 16px;">
+          <div class="col-6">
+            <h3 style="margin:0 0 10px 0;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Малые сделки</h3>
+            <div id="small-deals-list"></div>
+          </div>
+          <div class="col-6">
+            <h3 style="margin:0 0 10px 0;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;">Крупные сделки</h3>
+            <div id="big-deals-list"></div>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="card col-6">
       <h2>Пассивный доход (в месяц)</h2>
-      <div id="passive-rows"></div>
-      <button class="category-add" data-section="passive">+ Добавить источник пассивного дохода</button>
+      <div class="card-content">
+        <div id="passive-rows"></div>
+        <button class="category-add" data-section="passive">+ Добавить источник пассивного дохода</button>
+      </div>
     </section>
   </div>
 
@@ -2644,6 +2690,16 @@ document.getElementById('cancel-settings').addEventListener('click', cancelSetti
 
 document.getElementById('confirm-take-loan').addEventListener('click', confirmTakeLoan);
 document.getElementById('cancel-take-loan').addEventListener('click', cancelTakeLoan);
+
+document.querySelectorAll('.card h2').forEach(header => {
+  if (header.closest('#transition-overlay') || header.closest('#win-overlay') || header.closest('[id$="-overlay"]')) return;
+  header.addEventListener('click', () => {
+    const card = header.closest('.card');
+    if (card) {
+      card.classList.toggle('collapsed');
+    }
+  });
+});
 
 if (!loadState()) {
   loadProfession('engineer');
