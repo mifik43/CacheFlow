@@ -656,16 +656,24 @@
     font-weight: 600;
   }
   .data-table .row-removed {
-    opacity: 0.5;
-    pointer-events: none;
   }
-  .data-table .row-removed td {
-    opacity: 0.5;
+  .data-table .revert-btn {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    margin-left: 4px;
+    opacity: 1 !important;
   }
-  .data-table .row-removed .rname,
-  .data-table .row-removed .rvalue,
-  .data-table .row-removed .rpayment {
-    pointer-events: none;
+  .data-table .revert-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .data-table .revert-btn:active {
+    transform: scale(0.96);
   }
   .data-table .total-row td {
     font-weight: 700;
@@ -1395,15 +1403,18 @@ function fmt(n) {
   return x.toLocaleString('ru-RU') + ' ₽';
 }
 
-function rowHTML(name='', value='', isCurrency=false, diffClass='', removed=false) {
+function rowHTML(name='', value='', isCurrency=false, diffClass='', removed=false, revertData=null) {
   const diffCls = diffClass ? ` ${diffClass}` : '';
   const removedCls = removed ? ' row-removed' : '';
   const disabledAttr = removed ? 'disabled' : '';
   const hiddenClass = removed ? ' btn-hidden' : '';
+  const revertBtn = revertData ? `<button class="revert-btn" data-section="${revertData.section}" data-idx="${revertData.idx}" title="Отменить" aria-label="Отменить">↩</button>` : '';
+  const showRemove = !removed && diffClass !== 'row-diff-added';
+  const removeBtn = showRemove ? `<button class="remove${hiddenClass}" title="Удалить" aria-label="Удалить">✕</button>` : '';
   return `<tr class="data-row${diffCls}${removedCls}">
     <td><input type="text" class="rname" placeholder="Название" value="${name}" inputmode="text" ${disabledAttr} /></td>
     <td><input type="number" class="rvalue" placeholder="0" value="${value}" step="1" inputmode="numeric" ${disabledAttr} /></td>
-    <td class="actions-col"><button class="remove${hiddenClass}" title="Удалить" aria-label="Удалить">✕</button></td>
+    <td class="actions-col">${removeBtn}${revertBtn}</td>
   </tr>`;
 }
 
@@ -1417,6 +1428,125 @@ function getRowDiffClass(section, idx) {
   return '';
 }
 
+function revertRow(section, idx) {
+  const item = pending[section][idx];
+  if (!item) return;
+  
+  let cashDelta = item._cashDelta || 0;
+  if (!cashDelta && (section === 'liability' || section === 'expense' || section === 'passive')) {
+    const prop = pending.property.find(p => p.name === item.name);
+    if (prop) cashDelta = prop._cashDelta || 0;
+  }
+  if (!cashDelta && section === 'expense') {
+    const lia = pending.liability.find(l => l.name === item.name);
+    if (lia) cashDelta = lia._cashDelta || 0;
+  }
+  
+  if (item._removed) {
+    item._removed = false;
+    delete item._origIndex;
+    if (section === 'liability') {
+      const linked = pending.expense.find(e => e.name === item.name && e._removed);
+      if (linked) { linked._removed = false; delete linked._origIndex; }
+      const linkedProp = pending.property.find(p => p.name === item.name && p._removed);
+      if (linkedProp) { linkedProp._removed = false; delete linkedProp._origIndex; }
+      const linkedPass = pending.passive.find(p => p.name === item.name && p._removed);
+      if (linkedPass) { linkedPass._removed = false; delete linkedPass._origIndex; }
+    } else if (section === 'expense') {
+      const linked = pending.liability.find(l => l.name === item.name && l._removed);
+      if (linked) { linked._removed = false; delete linked._origIndex; }
+      const linkedProp = pending.property.find(p => p.name === item.name && p._removed);
+      if (linkedProp) { linkedProp._removed = false; delete linkedProp._origIndex; }
+      const linkedPass = pending.passive.find(p => p.name === item.name && p._removed);
+      if (linkedPass) { linkedPass._removed = false; delete linkedPass._origIndex; }
+    } else if (section === 'passive') {
+      const linkedProp = pending.property.find(p => p.name === item.name && p._removed);
+      if (linkedProp) { linkedProp._removed = false; delete linkedProp._origIndex; }
+      const linkedL = pending.liability.find(l => l.name === item.name && l._removed);
+      if (linkedL) { linkedL._removed = false; delete linkedL._origIndex; }
+      const linkedE = pending.expense.find(e => e.name === item.name && e._removed);
+      if (linkedE) { linkedE._removed = false; delete linkedE._origIndex; }
+    } else if (section === 'property') {
+      const linkedL = pending.liability.find(l => l.name === item.name && l._removed);
+      if (linkedL) { linkedL._removed = false; delete linkedL._origIndex; }
+      const linkedE = pending.expense.find(e => e.name === item.name && e._removed);
+      if (linkedE) { linkedE._removed = false; delete linkedE._origIndex; }
+      const linkedP = pending.passive.find(p => p.name === item.name && p._removed);
+      if (linkedP) { linkedP._removed = false; delete linkedP._origIndex; }
+    }
+    pending.cashOnHand -= cashDelta;
+  } else if (idx >= (committed[section] || []).length) {
+    pending[section].splice(idx, 1);
+    if (section === 'liability') {
+      const linkIdx = pending.expense.findIndex(e => e.name === item.name);
+      if (linkIdx >= 0) pending.expense.splice(linkIdx, 1);
+      const linkProp = pending.property.findIndex(p => p.name === item.name);
+      if (linkProp >= 0) pending.property.splice(linkProp, 1);
+      const linkPass = pending.passive.findIndex(p => p.name === item.name);
+      if (linkPass >= 0) pending.passive.splice(linkPass, 1);
+    } else if (section === 'expense') {
+      const linkIdx = pending.liability.findIndex(l => l.name === item.name);
+      if (linkIdx >= 0) pending.liability.splice(linkIdx, 1);
+      const linkProp = pending.property.findIndex(p => p.name === item.name);
+      if (linkProp >= 0) pending.property.splice(linkProp, 1);
+      const linkPass = pending.passive.findIndex(p => p.name === item.name);
+      if (linkPass >= 0) pending.passive.splice(linkPass, 1);
+    } else if (section === 'passive') {
+      const linkProp = pending.property.findIndex(p => p.name === item.name);
+      if (linkProp >= 0) pending.property.splice(linkProp, 1);
+      const linkL = pending.liability.findIndex(l => l.name === item.name);
+      if (linkL >= 0) pending.liability.splice(linkL, 1);
+      const linkE = pending.expense.findIndex(e => e.name === item.name);
+      if (linkE >= 0) pending.expense.splice(linkE, 1);
+    } else if (section === 'property') {
+      const linkIdxL = pending.liability.findIndex(l => l.name === item.name);
+      if (linkIdxL >= 0) pending.liability.splice(linkIdxL, 1);
+      const linkIdxE = pending.expense.findIndex(e => e.name === item.name);
+      if (linkIdxE >= 0) pending.expense.splice(linkIdxE, 1);
+      const linkIdxP = pending.passive.findIndex(p => p.name === item.name);
+      if (linkIdxP >= 0) pending.passive.splice(linkIdxP, 1);
+    }
+    pending.cashOnHand -= cashDelta;
+  } else {
+    const cItem = (committed[section] || [])[idx];
+    if (cItem) {
+      item.name = cItem.name;
+      item.value = Number(cItem.value) || 0;
+      if (section === 'liability') { item.payment = Number(cItem.payment) || 0; }
+      if (section === 'stocks') { item.price = Number(cItem.price) || 0; item.count = Number(cItem.count) || 0; }
+      if (section === 'property') { item.down = Number(cItem.down) || 0; item.mortgage = Number(cItem.mortgage) || 0; item.cashflow = Number(cItem.cashflow) || 0; }
+    }
+    if (section === 'liability') {
+      const linked = pending.expense.find(e => e.name === item.name);
+      if (linked) { linked.name = item.name; linked.value = item.payment; }
+    } else if (section === 'expense') {
+      const linked = pending.liability.find(l => l.name === item.name);
+      if (linked) { linked.name = item.name; }
+    } else if (section === 'property') {
+      const linkedL = pending.liability.find(l => l.name === item.name);
+      if (linkedL) {
+        linkedL.name = item.name;
+        linkedL.value = Number(item.mortgage) || 0;
+        linkedL.payment = Math.round((Number(item.mortgage) || 0) * (mortgageInterestRate / 100));
+      }
+      const linkedE = pending.expense.find(e => e.name === item.name);
+      if (linkedE) {
+        linkedE.name = item.name;
+        linkedE.value = Math.round((Number(item.mortgage) || 0) * (mortgageInterestRate / 100));
+      }
+      const linkedP = pending.passive.find(p => p.name === item.name);
+      if (linkedP) {
+        linkedP.name = item.name;
+        linkedP.value = Number(item.cashflow) || 0;
+      }
+    }
+    pending.cashOnHand -= cashDelta;
+  }
+  renderAll();
+  updateSummary(pending);
+  saveState();
+}
+
 function renderSection(section) {
   const meta = sectionMeta[section];
   const container = document.getElementById(meta.id);
@@ -1428,11 +1558,14 @@ function renderSection(section) {
       const removed = item._removed;
       const removedCls = removed ? ' row-removed' : '';
       const hiddenClass = removed ? ' btn-hidden' : '';
+      const revertBtn = diffClass ? `<button class="revert-btn" data-section="liability" data-idx="${idx}" title="Отменить" aria-label="Отменить">↩</button>` : '';
+      const showRemove = !removed && diffClass !== 'row-diff-added';
+      const removeBtn = showRemove ? `<button class="remove${hiddenClass}" title="Удалить" aria-label="Удалить">✕</button>` : '';
       return `<tr class="data-row${diffCls}${removedCls}">
         <td><input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" ${removed ? 'disabled' : ''} /></td>
         <td><span class="rpayment">${fmt(Number(item.payment) || 0)}</span></td>
         <td><span class="rvalue">${fmt(Number(item.value) || 0)}</span></td>
-        <td class="actions-col"><button class="remove${hiddenClass}" title="Удалить" aria-label="Удалить">✕</button></td>
+        <td class="actions-col">${removeBtn}${revertBtn}</td>
       </tr>`;
     }).join('');
     
@@ -1452,29 +1585,39 @@ function renderSection(section) {
         saveState();
       });
       
-      row.querySelector('.remove').addEventListener('click', () => {
-        item._removed = true;
-        item._origIndex = idx;
-        const linkedExpense = pending.expense.find(e => e.name === item.name);
-        if (linkedExpense) {
-          linkedExpense._removed = true;
-        }
-        pending.cashOnHand -= Number(item.value) || 0;
-        renderSection(section);
-        renderSection('expense');
-        updateDirtyFooter();
-        updateCashUI();
-        updateSummary(pending);
-        saveState();
-      });
-      });
+      const removeBtn = row.querySelector('.remove');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+          item._removed = true;
+          item._origIndex = idx;
+          item._cashDelta = -Number(item.value) || 0;
+          const linkedExpense = pending.expense.find(e => e.name === item.name);
+          if (linkedExpense) {
+            linkedExpense._removed = true;
+            linkedExpense._cashDelta = item._cashDelta;
+          }
+          pending.cashOnHand -= Number(item.value) || 0;
+          renderSection(section);
+          renderSection('expense');
+          updateDirtyFooter();
+          updateCashUI();
+          updateSummary(pending);
+          saveState();
+        });
+      }
       
-      const totalLiabilityPayment = pending[section].filter(i => !i._removed).reduce((s,i)=>s+(Number(i.payment)||0),0);
-      const totalLiabilityValue = pending[section].filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0);
-      const totalLiabilityRow = document.createElement('tr');
-      totalLiabilityRow.className = 'total-row';
-      totalLiabilityRow.innerHTML = `<td>Итого</td><td>${fmt(totalLiabilityPayment)}</td><td>${fmt(totalLiabilityValue)}</td><td class="actions-col"></td>`;
-      container.appendChild(totalLiabilityRow);
+      const revertBtn = row.querySelector('.revert-btn');
+      if (revertBtn) {
+        revertBtn.addEventListener('click', () => revertRow(section, idx));
+      }
+    });
+    
+    const totalLiabilityPayment = pending[section].filter(i => !i._removed).reduce((s,i)=>s+(Number(i.payment)||0),0);
+    const totalLiabilityValue = pending[section].filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0);
+    const totalLiabilityRow = document.createElement('tr');
+    totalLiabilityRow.className = 'total-row';
+    totalLiabilityRow.innerHTML = `<td>Итого</td><td>${fmt(totalLiabilityPayment)}</td><td>${fmt(totalLiabilityValue)}</td><td class="actions-col"></td>`;
+    container.appendChild(totalLiabilityRow);
     } else if (section === 'asset') {
     container.innerHTML = pending[section].map((item, idx) => {
       const diffClass = getRowDiffClass(section, idx);
@@ -1482,10 +1625,13 @@ function renderSection(section) {
       const removed = item._removed;
       const removedCls = removed ? ' row-removed' : '';
       const hiddenClass = removed ? ' btn-hidden' : '';
+      const revertBtn = diffClass ? `<button class="revert-btn" data-section="asset" data-idx="${idx}" title="Отменить" aria-label="Отменить">↩</button>` : '';
+      const showSell = !removed && diffClass !== 'row-diff-added';
+      const sellBtn = showSell ? `<button class="sell-asset${hiddenClass}" data-idx="${idx}" title="Продать" aria-label="Продать">Продать</button>` : '';
       return `<tr class="data-row${diffCls}${removedCls}">
         <td><input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" ${removed ? 'disabled' : ''} /></td>
         <td><span class="rvalue">${fmt(Number(item.value) || 0)}</span></td>
-        <td class="actions-col"><button class="sell-asset${hiddenClass}" data-idx="${idx}" title="Продать" aria-label="Продать">Продать</button></td>
+        <td class="actions-col">${sellBtn}${revertBtn}</td>
       </tr>`;
     }).join('');
     
@@ -1496,9 +1642,16 @@ function renderSection(section) {
         item.name = e.target.value;
         saveState();
       });
-      row.querySelector('.sell-asset').addEventListener('click', () => {
-        openSellAsset(idx);
-      });
+      const sellBtn = row.querySelector('.sell-asset');
+      if (sellBtn) {
+        sellBtn.addEventListener('click', () => {
+          openSellAsset(idx);
+        });
+      }
+      const revertBtn = row.querySelector('.revert-btn');
+      if (revertBtn) {
+        revertBtn.addEventListener('click', () => revertRow('asset', idx));
+      }
       });
       
       const totalAssetValue = pending[section].filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0);
@@ -1507,7 +1660,11 @@ function renderSection(section) {
       totalAssetRow.innerHTML = `<td>Итого</td><td>${fmt(totalAssetValue)}</td><td class="actions-col"></td>`;
       container.appendChild(totalAssetRow);
     } else {
-    container.innerHTML = pending[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency, getRowDiffClass(section, idx), item._removed)).join('');
+    container.innerHTML = pending[section].map((item, idx) => {
+      const diffClass = getRowDiffClass(section, idx);
+      const revertData = diffClass ? {section, idx} : null;
+      return rowHTML(item.name, item.value, meta.currency, diffClass, item._removed, revertData);
+    }).join('');
     container.querySelectorAll('.data-row').forEach((row, idx) => {
       const item = pending[section][idx];
       row.querySelector('.rname').value = item.name;
@@ -1531,20 +1688,27 @@ function renderSection(section) {
         updateSummary(pending);
         saveState();
       });
-      row.querySelector('.remove').addEventListener('click', () => {
-        item._removed = true;
-        item._origIndex = idx;
-        const linkedLiability = pending.liability.find(l => l.name === item.name);
-        if (linkedLiability) {
-          linkedLiability._removed = true;
-        }
-        renderSection('expense');
-        renderSection(section);
-        renderSection('liability');
-        updateDirtyFooter();
-        updateSummary(pending);
-        saveState();
-      });
+      const removeBtn = row.querySelector('.remove');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', () => {
+          item._removed = true;
+          item._origIndex = idx;
+          const linkedLiability = pending.liability.find(l => l.name === item.name);
+          if (linkedLiability) {
+            linkedLiability._removed = true;
+          }
+          renderSection('expense');
+          renderSection(section);
+          renderSection('liability');
+          updateDirtyFooter();
+          updateSummary(pending);
+          saveState();
+        });
+      }
+      const revertBtn = row.querySelector('.revert-btn');
+      if (revertBtn) {
+        revertBtn.addEventListener('click', () => revertRow(section, idx));
+      }
       });
       
       const totalValue = pending[section].filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0);
@@ -1565,26 +1729,36 @@ function renderStocks() {
     const diffCls = diffClass ? ` ${diffClass}` : '';
     const removedCls = removed ? ' row-removed' : '';
     const hiddenClass = removed ? ' btn-hidden' : '';
+    const revertBtn = diffClass ? `<button class="revert-btn" data-section="stocks" data-idx="${idx}" title="Отменить" aria-label="Отменить">↩</button>` : '';
+    const isNew = diffClass === 'row-diff-added';
+    const buyHidden = (removed || isNew) ? ' btn-hidden' : '';
+    const sellHidden = (removed || isNew) ? ' btn-hidden' : '';
     return `<tr class="data-row${diffCls}${removedCls}">
       <td>${stock.name}</td>
       <td>${fmt(Number(stock.price) || 0)}</td>
       <td>${Number(stock.count) || 0}</td>
       <td>${fmt(total)}</td>
       <td class="actions-col">
-        <button class="stock-buy${hiddenClass}" title="Купить" aria-label="Купить">Купить</button>
-        <button class="stock-sell${hiddenClass}" title="Продать" aria-label="Продать">Продать</button>
+        <button class="stock-buy${buyHidden}" title="Купить" aria-label="Купить">Купить</button>
+        <button class="stock-sell${sellHidden}" title="Продать" aria-label="Продать">Продать</button>
+        ${revertBtn}
       </td>
     </tr>`;
   }).join('');
 
   container.querySelectorAll('.data-row').forEach((row, idx) => {
     const stock = pending.stocks[idx];
-    if (stock._removed) return;
     const buyBtn = row.querySelector('.stock-buy');
     const sellBtn = row.querySelector('.stock-sell');
 
-    buyBtn.addEventListener('click', () => openBuyStocks(idx));
-    sellBtn.addEventListener('click', () => openSellStocks(idx));
+    if (!stock._removed && getDiffStatus('stocks', stock, idx) !== 'added') {
+      buyBtn.addEventListener('click', () => openBuyStocks(idx));
+      sellBtn.addEventListener('click', () => openSellStocks(idx));
+    }
+    const revertBtn = row.querySelector('.revert-btn');
+    if (revertBtn) {
+      revertBtn.addEventListener('click', () => revertRow('stocks', idx));
+    }
   });
   
   const totalStocksValue = pending.stocks.filter(i => !i._removed).reduce((s,i)=>s+((Number(i.price)||0)*(Number(i.count)||0)),0);
@@ -1700,7 +1874,7 @@ function confirmTakeLoan() {
   const defaultName = `Кредит ${fmt(amount)}`;
   const loanName = name || defaultName;
   
-  pending.liability.push({name: loanName, value: amount, payment: payment});
+  pending.liability.push({name: loanName, value: amount, payment: payment, _cashDelta: amount});
   if (payment > 0) {
     syncLiabilityExpense(pending.liability[pending.liability.length - 1]);
   }
@@ -1769,7 +1943,7 @@ function confirmBuyAsset() {
     pending.asset[buyAssetIndex].name = name;
     pending.asset[buyAssetIndex].value = price;
   } else {
-    pending.asset.push({name, value: price});
+    pending.asset.push({name, value: price, _cashDelta: -price});
   }
   pending.cashOnHand -= price;
 
@@ -1818,6 +1992,7 @@ function confirmSellAsset() {
 
   if (sellAssetIndex >= 0 && sellAssetIndex < pending.asset.length) {
     pending.asset[sellAssetIndex]._removed = true;
+    pending.asset[sellAssetIndex]._cashDelta = price;
   }
   pending.cashOnHand += price;
 
@@ -1844,19 +2019,27 @@ function renderProperties() {
     const diffCls = diffClass ? ` ${diffClass}` : '';
     const removedCls = removed ? ' row-removed' : '';
     const hiddenClass = removed ? ' btn-hidden' : '';
+    const revertBtn = diffClass ? `<button class="revert-btn" data-section="property" data-idx="${idx}" title="Отменить" aria-label="Отменить">↩</button>` : '';
+    const showSell = !removed && diffClass !== 'row-diff-added';
+    const sellBtn = showSell ? `<button class="stock-sell${hiddenClass}" title="Продать" aria-label="Продать">Продать</button>` : '';
     return `<tr class="data-row${diffCls}${removedCls}">
       <td>${prop.name}</td>
       <td>${fmt(Number(prop.down) || 0)}</td>
       <td>${fmt(Number(prop.mortgage) || 0)}</td>
       <td>${fmt(Number(prop.cashflow) || 0)}</td>
-      <td class="actions-col"><button class="stock-sell${hiddenClass}" title="Продать" aria-label="Продать">Продать</button></td>
+      <td class="actions-col">${sellBtn}${revertBtn}</td>
     </tr>`;
   }).join('');
 
   container.querySelectorAll('.data-row').forEach((row, idx) => {
     const prop = pending.property[idx];
-    if (prop._removed) return;
-    row.querySelector('.stock-sell').addEventListener('click', () => openSellProperty(idx));
+    if (!prop._removed && getDiffStatus('property', prop, idx) !== 'added') {
+      row.querySelector('.stock-sell').addEventListener('click', () => openSellProperty(idx));
+    }
+    const revertBtn = row.querySelector('.revert-btn');
+    if (revertBtn) {
+      revertBtn.addEventListener('click', () => revertRow('property', idx));
+    }
   });
   
   const totalPropDown = pending.property.filter(i => !i._removed).reduce((s,i)=>s+(Number(i.down)||0),0);
@@ -1896,22 +2079,27 @@ function confirmSellProperty() {
   if (sellPropertyIndex >= 0 && sellPropertyIndex < pending.property.length) {
     const prop = pending.property[sellPropertyIndex];
     const mortgage = Number(prop.mortgage) || 0;
-    pending.cashOnHand += salePrice - mortgage;
+    const cashDelta = salePrice - mortgage;
+    pending.cashOnHand += cashDelta;
 
     prop._removed = true;
+    prop._cashDelta = cashDelta;
 
     const liabilityIdx = pending.liability.findIndex(l => l.name === prop.name);
     if (liabilityIdx !== -1) {
       pending.liability[liabilityIdx]._removed = true;
+      pending.liability[liabilityIdx]._cashDelta = 0;
     }
     const expenseIdx = pending.expense.findIndex(e => e.name === prop.name);
     if (expenseIdx !== -1) {
       pending.expense[expenseIdx]._removed = true;
+      pending.expense[expenseIdx]._cashDelta = 0;
     }
 
     const passiveIdx = pending.passive.findIndex(p => p.name === prop.name);
     if (passiveIdx !== -1) {
       pending.passive[passiveIdx]._removed = true;
+      pending.passive[passiveIdx]._cashDelta = 0;
     }
   }
 
@@ -2008,12 +2196,12 @@ function confirmBuyProperty() {
   if (pending.property.some(p => p.name === name)) { nameInput.focus(); return; }
   
   const payment = Math.round(mortgage * (mortgageInterestRate / 100));
-  pending.property.push({name, down, mortgage, cashflow});
-  pending.liability.push({name, value: mortgage, payment: payment});
+  pending.property.push({name, down, mortgage, cashflow, _cashDelta: -down});
+  pending.liability.push({name, value: mortgage, payment: payment, _cashDelta: 0});
   if (payment > 0) {
     syncLiabilityExpense(pending.liability[pending.liability.length - 1]);
   }
-  pending.passive.push({name, value: cashflow});
+  pending.passive.push({name, value: cashflow, _cashDelta: 0});
   pending.cashOnHand -= down;
   
   overlay.classList.remove('visible');
