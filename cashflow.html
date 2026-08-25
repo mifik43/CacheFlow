@@ -1223,9 +1223,11 @@ function renderSection(section) {
         if (linkedExpense) {
           linkedExpense._removed = true;
         }
+        pending.cashOnHand -= Number(item.value) || 0;
         renderSection(section);
         renderSection('expense');
         updateDirtyFooter();
+        updateCashUI();
         updateSummary(pending);
         saveState();
       });
