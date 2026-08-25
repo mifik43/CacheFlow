@@ -299,35 +299,6 @@
     font-weight: 600;
   }
 
-  .stock-row-diff-added {
-    background: rgba(74,222,128,0.2);
-    border-left: 4px solid var(--green);
-    margin-left: -4px;
-  }
-  .stock-row-diff-added .stock-name, .stock-row-diff-added .stock-price, .stock-row-diff-added .stock-count, .stock-row-diff-added .stock-total {
-    color: var(--green);
-    font-weight: 600;
-  }
-  .stock-row-diff-removed {
-    background: rgba(248,113,113,0.2);
-    border-left: 4px solid var(--red);
-    margin-left: -4px;
-  }
-  .stock-row-diff-removed .stock-name, .stock-row-diff-removed .stock-price, .stock-row-diff-removed .stock-count, .stock-row-diff-removed .stock-total {
-    color: var(--red);
-    text-decoration: line-through;
-    font-weight: 600;
-  }
-  .stock-row-diff-modified {
-    background: rgba(251,191,36,0.2);
-    border-left: 4px solid var(--amber);
-    margin-left: -4px;
-  }
-  .stock-row-diff-modified .stock-name, .stock-row-diff-modified .stock-price, .stock-row-diff-modified .stock-count, .stock-row-diff-modified .stock-total {
-    color: var(--amber);
-    font-weight: 600;
-  }
-
   .dirty-footer {
     display: none;
     position: fixed;
@@ -543,7 +514,6 @@
   #settings-btn { margin-left: 8px; }
   .profession-label { color: var(--muted); font-size: 14px; }
   .row-removed { opacity: 0.5; pointer-events: none; }
-  .stock-row-removed { opacity: 0.5; }
   .btn-hidden { display: none; }
   .change-good { color: var(--green); }
   .change-bad { color: var(--red); }
@@ -1305,20 +1275,20 @@ function renderStocks() {
     const total = (Number(stock.price) || 0) * (Number(stock.count) || 0);
     const removed = stock._removed;
     const status = removed ? 'removed' : getDiffStatus('stocks', stock, idx);
-    const diffClass = status === 'added' ? 'stock-row-diff-added' : status === 'removed' ? 'stock-row-diff-removed' : status === 'modified' ? 'stock-row-diff-modified' : '';
+    const diffClass = status === 'added' ? 'row-diff-added' : status === 'removed' ? 'row-diff-removed' : status === 'modified' ? 'row-diff-modified' : '';
     const diffCls = diffClass ? ` ${diffClass}` : '';
-    const removedCls = removed ? ' stock-row-removed' : '';
-    return `<div class="stock-row${diffCls}${removedCls}">
-      <div class="stock-name">${stock.name}</div>
-      <div class="stock-price">${fmt(Number(stock.price) || 0)}</div>
-      <div class="stock-count">${Number(stock.count) || 0}</div>
-      <div class="stock-total">${fmt(total)}</div>
+    const removedCls = removed ? ' row-removed' : '';
+    return `<div class="row${diffCls}${removedCls}">
+      <div class="rname">${stock.name}</div>
+      <div class="rvalue">${fmt(Number(stock.price) || 0)}</div>
+      <div class="rvalue">${Number(stock.count) || 0}</div>
+      <div class="rvalue">${fmt(total)}</div>
       <button class="stock-buy" title="Купить" aria-label="Купить" ${removed ? 'class="stock-buy btn-hidden"' : ''}>Купить</button>
       <button class="stock-sell" title="Продать" aria-label="Продать" ${removed ? 'class="stock-sell btn-hidden"' : ''}>Продать</button>
     </div>`;
   }).join('');
 
-  container.querySelectorAll('.stock-row').forEach((row, idx) => {
+  container.querySelectorAll('.row').forEach((row, idx) => {
     const stock = pending.stocks[idx];
     if (stock._removed) return;
     const buyBtn = row.querySelector('.stock-buy');
@@ -1575,19 +1545,19 @@ function renderProperties() {
   container.innerHTML = pending.property.map((prop, idx) => {
     const removed = prop._removed;
     const status = removed ? 'removed' : getDiffStatus('property', prop, idx);
-    const diffClass = status === 'added' ? 'stock-row-diff-added' : status === 'removed' ? 'stock-row-diff-removed' : status === 'modified' ? 'stock-row-diff-modified' : '';
+    const diffClass = status === 'added' ? 'row-diff-added' : status === 'removed' ? 'row-diff-removed' : status === 'modified' ? 'row-diff-modified' : '';
     const diffCls = diffClass ? ` ${diffClass}` : '';
-    const removedCls = removed ? ' stock-row-removed' : '';
-    return `<div class="stock-row${diffCls}${removedCls}">
-      <div class="stock-name">${prop.name}</div>
-      <div class="stock-price">${fmt(Number(prop.down) || 0)}</div>
-      <div class="stock-count">${fmt(Number(prop.mortgage) || 0)}</div>
-      <div class="stock-total">${fmt(Number(prop.cashflow) || 0)}</div>
+    const removedCls = removed ? ' row-removed' : '';
+    return `<div class="row${diffCls}${removedCls}">
+      <div class="rname">${prop.name}</div>
+      <div class="rvalue">${fmt(Number(prop.down) || 0)}</div>
+      <div class="rvalue">${fmt(Number(prop.mortgage) || 0)}</div>
+      <div class="rvalue">${fmt(Number(prop.cashflow) || 0)}</div>
       <button class="stock-sell" title="Продать" aria-label="Продать" ${removed ? 'class="stock-sell btn-hidden"' : ''}>Продать</button>
     </div>`;
   }).join('');
 
-  container.querySelectorAll('.stock-row').forEach((row, idx) => {
+  container.querySelectorAll('.row').forEach((row, idx) => {
     const prop = pending.property[idx];
     if (prop._removed) return;
     row.querySelector('.stock-sell').addEventListener('click', () => openSellProperty(idx));
@@ -2046,7 +2016,7 @@ function addEmpty(section) {
   const meta = sectionMeta[section];
   const last = document.getElementById(meta.id).lastElementChild;
   if (last) {
-    const nameField = last.querySelector('.rname, .stock-name');
+    const nameField = last.querySelector('.rname');
     if (nameField) nameField.focus();
   }
 }
