@@ -640,6 +640,20 @@
   .data-table .row-removed .rpayment {
     pointer-events: none;
   }
+  .data-table .total-row td {
+    font-weight: 700;
+    border-top: 2px solid var(--border);
+    background: rgba(255,255,255,0.03);
+    text-align: right;
+  }
+  .data-table .total-row td:first-child {
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .data-table .total-row td.actions-col {
+    text-align: center;
+  }
 
   @media (max-width: 640px) {
     .data-table th,
@@ -1425,8 +1439,15 @@ function renderSection(section) {
         updateSummary(pending);
         saveState();
       });
-    });
-  } else if (section === 'asset') {
+      });
+      
+      const totalLiabilityPayment = pending[section].filter(i => !i._removed).reduce((s,i)=>s+(Number(i.payment)||0),0);
+      const totalLiabilityValue = pending[section].filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0);
+      const totalLiabilityRow = document.createElement('tr');
+      totalLiabilityRow.className = 'total-row';
+      totalLiabilityRow.innerHTML = `<td>Итого</td><td>${fmt(totalLiabilityPayment)}</td><td>${fmt(totalLiabilityValue)}</td><td class="actions-col"></td>`;
+      container.appendChild(totalLiabilityRow);
+    } else if (section === 'asset') {
     container.innerHTML = pending[section].map((item, idx) => {
       const diffClass = getRowDiffClass(section, idx);
       const diffCls = diffClass ? ` ${diffClass}` : '';
@@ -1450,8 +1471,14 @@ function renderSection(section) {
       row.querySelector('.sell-asset').addEventListener('click', () => {
         openSellAsset(idx);
       });
-    });
-  } else {
+      });
+      
+      const totalAssetValue = pending[section].filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0);
+      const totalAssetRow = document.createElement('tr');
+      totalAssetRow.className = 'total-row';
+      totalAssetRow.innerHTML = `<td>Итого</td><td>${fmt(totalAssetValue)}</td><td class="actions-col"></td>`;
+      container.appendChild(totalAssetRow);
+    } else {
     container.innerHTML = pending[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency, getRowDiffClass(section, idx), item._removed)).join('');
     container.querySelectorAll('.data-row').forEach((row, idx) => {
       const item = pending[section][idx];
@@ -1490,9 +1517,15 @@ function renderSection(section) {
         updateSummary(pending);
         saveState();
       });
-    });
+      });
+      
+      const totalValue = pending[section].filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0);
+      const totalRow = document.createElement('tr');
+      totalRow.className = 'total-row';
+      totalRow.innerHTML = `<td>Итого</td><td>${fmt(totalValue)}</td><td class="actions-col"></td>`;
+      container.appendChild(totalRow);
+    }
   }
-}
 
 function renderStocks() {
   const container = document.getElementById('stocks-rows');
@@ -1525,6 +1558,12 @@ function renderStocks() {
     buyBtn.addEventListener('click', () => openBuyStocks(idx));
     sellBtn.addEventListener('click', () => openSellStocks(idx));
   });
+  
+  const totalStocksValue = pending.stocks.filter(i => !i._removed).reduce((s,i)=>s+((Number(i.price)||0)*(Number(i.count)||0)),0);
+  const totalStocksRow = document.createElement('tr');
+  totalStocksRow.className = 'total-row';
+  totalStocksRow.innerHTML = `<td>Итого</td><td>-</td><td>-</td><td>${fmt(totalStocksValue)}</td><td class="actions-col"></td>`;
+  container.appendChild(totalStocksRow);
 }
 
 function syncLiabilityExpense(item) {
@@ -1791,6 +1830,14 @@ function renderProperties() {
     if (prop._removed) return;
     row.querySelector('.stock-sell').addEventListener('click', () => openSellProperty(idx));
   });
+  
+  const totalPropDown = pending.property.filter(i => !i._removed).reduce((s,i)=>s+(Number(i.down)||0),0);
+  const totalPropMortgage = pending.property.filter(i => !i._removed).reduce((s,i)=>s+(Number(i.mortgage)||0),0);
+  const totalPropCashflow = pending.property.filter(i => !i._removed).reduce((s,i)=>s+(Number(i.cashflow)||0),0);
+  const totalPropRow = document.createElement('tr');
+  totalPropRow.className = 'total-row';
+  totalPropRow.innerHTML = `<td>Итого</td><td>${fmt(totalPropDown)}</td><td>${fmt(totalPropMortgage)}</td><td>${fmt(totalPropCashflow)}</td><td class="actions-col"></td>`;
+  container.appendChild(totalPropRow);
 }
 
 let sellPropertyIndex = -1;
@@ -2156,6 +2203,13 @@ function renderDeals() {
     </tr>
   `).join('');
   
+  const smallTotalCost = FAST_TRACK_DEALS.small.reduce((s,d)=>s+d.cost,0);
+  const smallTotalIncome = FAST_TRACK_DEALS.small.reduce((s,d)=>s+d.income,0);
+  const smallTotalRow = document.createElement('tr');
+  smallTotalRow.className = 'total-row';
+  smallTotalRow.innerHTML = `<td>Итого</td><td>-${fmt(smallTotalCost)}</td><td>+${fmt(smallTotalIncome)}/мес</td><td></td><td class="actions-col"></td>`;
+  smallList.appendChild(smallTotalRow);
+  
   bigList.innerHTML = FAST_TRACK_DEALS.big.map((deal, idx) => `
     <tr class="deal-row">
       <td>${deal.name}</td>
@@ -2165,6 +2219,13 @@ function renderDeals() {
       <td class="actions-col"><button class="primary" onclick="buyDeal('big', ${idx})">Купить</button></td>
     </tr>
   `).join('');
+  
+  const bigTotalCost = FAST_TRACK_DEALS.big.reduce((s,d)=>s+d.cost,0);
+  const bigTotalIncome = FAST_TRACK_DEALS.big.reduce((s,d)=>s+d.income,0);
+  const bigTotalRow = document.createElement('tr');
+  bigTotalRow.className = 'total-row';
+  bigTotalRow.innerHTML = `<td>Итого</td><td>-${fmt(bigTotalCost)}</td><td>+${fmt(bigTotalIncome)}/мес</td><td></td><td class="actions-col"></td>`;
+  bigList.appendChild(bigTotalRow);
 }
 
 function buyDeal(type, idx) {
