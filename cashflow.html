@@ -24,6 +24,7 @@
     background: linear-gradient(135deg, #0f172a, #1e293b);
     color: var(--text);
     line-height: 1.45;
+    padding-bottom: 80px;
   }
   .container {
     max-width: 1100px;
@@ -77,6 +78,11 @@
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 16px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .card.has-changes {
+    border-color: var(--amber);
+    box-shadow: 0 0 0 1px var(--amber), 0 0 12px rgba(251,191,36,0.15);
   }
   .col-12 { grid-column: span 12; }
   .col-6  { grid-column: span 6; }
@@ -110,6 +116,7 @@
     gap: 10px;
     margin-bottom: 10px;
     flex-wrap: wrap;
+    position: relative;
   }
   .row label { font-size: 14px; color: var(--muted); flex: 1; min-width: 0; }
   .row input[type="number"] {
@@ -173,6 +180,10 @@
   .value.positive { color: var(--green); }
   .value.negative { color: var(--red); }
   .value.neutral  { color: var(--amber); }
+  .metric .change { font-size: 12px; margin-top: 4px; min-height: 16px; }
+  .metric .change.positive { color: var(--green); }
+  .metric .change.negative { color: var(--red); }
+  .metric .change.neutral { color: var(--muted); }
 
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
   .hint { color: var(--muted); font-size: 12px; margin-top: 8px; }
@@ -198,69 +209,7 @@
     border-right: 2px solid #fff;
   }
 
-  .staging-area {
-    background: #0b1220;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px;
-    margin-top: 12px;
-  }
-  .staging-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-  }
-  .staging-title {
-    font-size: 13px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  #dirty-indicator {
-    display: none;
-    background: var(--amber);
-    color: #0f172a;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 999px;
-  }
-  #staging-actions {
-    display: none;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .staging-empty {
-    color: var(--muted);
-    font-size: 13px;
-    text-align: center;
-    padding: 8px 0;
-  }
-  .staging-list { max-height: 240px; overflow: auto; }
-  .diff-line {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-radius: 6px;
-    font-size: 13px;
-    margin-bottom: 4px;
-    flex-wrap: wrap;
-  }
-  .diff-added { background: rgba(74,222,128,0.1); color: var(--green); }
-  .diff-removed { background: rgba(248,113,113,0.1); color: var(--red); }
-  .diff-modified { background: rgba(251,191,36,0.1); color: var(--amber); }
-  .diff-section { font-weight: 600; min-width: 100px; }
-  .diff-op { font-weight: 700; }
-  .diff-old { text-decoration: line-through; opacity: 0.8; }
-  .diff-arrow { margin: 0 4px; }
-  .diff-new { font-weight: 600; }
+
 
   .category-add {
     display: inline-flex;
@@ -289,6 +238,94 @@
   .row .remove:hover { border-color: var(--red); color: var(--red); }
   .custom-row { animation: fadeIn 0.2s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+
+  .row-diff-added {
+    background: rgba(74,222,128,0.2);
+    border-left: 4px solid var(--green);
+    margin-left: -4px;
+  }
+  .row-diff-added .rname, .row-diff-added .rvalue, .row-diff-added .rpayment {
+    color: var(--green);
+    font-weight: 600;
+  }
+  .row-diff-added::before {
+    content: '+';
+    position: absolute;
+    left: -20px;
+    color: var(--green);
+    font-weight: 700;
+  }
+  .row-diff-removed {
+    background: rgba(248,113,113,0.2);
+    border-left: 4px solid var(--red);
+    margin-left: -4px;
+  }
+  .row-diff-removed .rname, .row-diff-removed .rvalue, .row-diff-removed .rpayment {
+    color: var(--red);
+    text-decoration: line-through;
+    font-weight: 600;
+  }
+  .row-diff-modified {
+    background: rgba(251,191,36,0.2);
+    border-left: 4px solid var(--amber);
+    margin-left: -4px;
+  }
+  .row-diff-modified .rname, .row-diff-modified .rvalue, .row-diff-modified .rpayment {
+    color: var(--amber);
+    font-weight: 600;
+  }
+
+  .stock-row-diff-added {
+    background: rgba(74,222,128,0.2);
+    border-left: 4px solid var(--green);
+    margin-left: -4px;
+  }
+  .stock-row-diff-added .stock-name, .stock-row-diff-added .stock-price, .stock-row-diff-added .stock-count, .stock-row-diff-added .stock-total {
+    color: var(--green);
+    font-weight: 600;
+  }
+  .stock-row-diff-removed {
+    background: rgba(248,113,113,0.2);
+    border-left: 4px solid var(--red);
+    margin-left: -4px;
+  }
+  .stock-row-diff-removed .stock-name, .stock-row-diff-removed .stock-price, .stock-row-diff-removed .stock-count, .stock-row-diff-removed .stock-total {
+    color: var(--red);
+    text-decoration: line-through;
+    font-weight: 600;
+  }
+  .stock-row-diff-modified {
+    background: rgba(251,191,36,0.2);
+    border-left: 4px solid var(--amber);
+    margin-left: -4px;
+  }
+  .stock-row-diff-modified .stock-name, .stock-row-diff-modified .stock-price, .stock-row-diff-modified .stock-count, .stock-row-diff-modified .stock-total {
+    color: var(--amber);
+    font-weight: 600;
+  }
+
+  .dirty-footer {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #0b1220;
+    border-top: 1px solid var(--amber);
+    padding: 12px 24px;
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+  }
+  .dirty-footer.visible { display: flex; }
+  .dirty-footer .dirty-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--amber);
+    margin-right: 8px;
+  }
 
   .game-banner {
     display: none;
@@ -546,7 +583,7 @@
     font-size: 14px;
   }
   .take-loan-modal input:focus { outline: none; border-color: var(--accent); }
-  .stock-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .stock-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; position: relative; }
   .stock-row .stock-name { flex: 2 1 160px; min-width: 0; }
   .stock-row .stock-price { flex: 1 1 90px; min-width: 0; text-align: right; }
   .stock-row .stock-count { flex: 1 1 70px; min-width: 0; text-align: right; }
@@ -697,26 +734,32 @@
         <div class="metric">
           <div class="name">Общий доход</div>
           <div class="value neutral" id="total-income">0 ₽</div>
+          <div class="change" id="change-total-income"></div>
         </div>
         <div class="metric">
           <div class="name">Общие расходы</div>
           <div class="value negative" id="total-expenses">0 ₽</div>
+          <div class="change" id="change-total-expenses"></div>
         </div>
         <div class="metric">
           <div class="name">Пассивный доход</div>
           <div class="value positive" id="total-passive">0 ₽</div>
+          <div class="change" id="change-total-passive"></div>
         </div>
         <div class="metric">
           <div class="name">Денежный поток</div>
           <div class="value" id="cashflow">0 ₽</div>
+          <div class="change" id="change-cashflow"></div>
         </div>
         <div class="metric">
           <div class="name">Наличность</div>
           <div class="value neutral" id="cash-on-hand">0 ₽</div>
+          <div class="change" id="change-cash-on-hand"></div>
         </div>
         <div class="metric">
           <div class="name">Чистые активы</div>
           <div class="value positive" id="net-worth">0 ₽</div>
+          <div class="change" id="change-net-worth"></div>
         </div>
       </div>
       <div class="cash-actions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
@@ -733,16 +776,7 @@
         <div class="bar"><i id="balance-indicator"></i></div>
         <div class="hint" id="status-text">Введите данные, чтобы увидеть расчёт</div>
       </div>
-      <div class="staging-area">
-        <div class="staging-header">
-          <div class="staging-title">Незафиксированные изменения <span id="dirty-indicator">!</span></div>
-          <div id="staging-actions">
-            <button class="primary" id="commit">Подтвердить</button>
-            <button id="revert">Отменить</button>
-          </div>
-        </div>
-        <div id="staging-list"></div>
-      </div>
+
     </section>
 
     <section class="card col-12">
@@ -800,6 +834,12 @@
       <div id="passive-rows"></div>
       <button class="category-add" data-section="passive">+ Добавить источник пассивного дохода</button>
     </section>
+  </div>
+
+  <div class="dirty-footer" id="dirty-footer">
+    <span class="dirty-label">● Есть незафиксированные изменения</span>
+    <button class="primary" id="commit">Подтвердить</button>
+    <button id="revert">Отменить</button>
   </div>
 
   <div id="transition-overlay" class="transition-overlay">
@@ -1240,12 +1280,24 @@ function fmt(n) {
   return x.toLocaleString('ru-RU') + ' ₽';
 }
 
-function rowHTML(name='', value='', isCurrency=false) {
-  return `<div class="row">
-    <input type="text" class="rname" placeholder="Название" value="${name}" inputmode="text" />
-    <input type="number" class="rvalue" placeholder="0" value="${value}" step="1" inputmode="numeric" />
-    <button class="remove" title="Удалить" aria-label="Удалить">✕</button>
+function rowHTML(name='', value='', isCurrency=false, diffClass='', removed=false) {
+  const diffCls = diffClass ? ` ${diffClass}` : '';
+  const removedStyle = removed ? 'style="opacity: 0.5; pointer-events: none;"' : '';
+  return `<div class="row${diffCls}" ${removedStyle}>
+    <input type="text" class="rname" placeholder="Название" value="${name}" inputmode="text" ${removed ? 'disabled' : ''} />
+    <input type="number" class="rvalue" placeholder="0" value="${value}" step="1" inputmode="numeric" ${removed ? 'disabled' : ''} />
+    <button class="remove" title="Удалить" aria-label="Удалить" ${removed ? 'style="display:none;"' : ''}>✕</button>
   </div>`;
+}
+
+function getRowDiffClass(section, idx) {
+  const item = pending[section][idx];
+  if (item && item._removed) return 'row-diff-removed';
+  const status = getDiffStatus(section, item, idx);
+  if (status === 'added') return 'row-diff-added';
+  if (status === 'removed') return 'row-diff-removed';
+  if (status === 'modified') return 'row-diff-modified';
+  return '';
 }
 
 function renderSection(section) {
@@ -1253,14 +1305,18 @@ function renderSection(section) {
   const container = document.getElementById(meta.id);
   
   if (section === 'liability') {
-    container.innerHTML = pending[section].map((item, idx) => 
-      `<div class="row">
-        <input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" />
+    container.innerHTML = pending[section].map((item, idx) => {
+      const diffClass = getRowDiffClass(section, idx);
+      const diffCls = diffClass ? ` ${diffClass}` : '';
+      const removed = item._removed;
+      const removedStyle = removed ? 'style="opacity: 0.5;"' : '';
+      return `<div class="row${diffCls}" ${removedStyle}>
+        <input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" ${removed ? 'disabled' : ''} />
         <span class="rpayment">${fmt(Number(item.payment) || 0)}</span>
         <span class="rvalue">${fmt(Number(item.value) || 0)}</span>
-        <button class="remove" title="Удалить" aria-label="Удалить">✕</button>
-      </div>`
-    ).join('');
+        <button class="remove" title="Удалить" aria-label="Удалить" ${removed ? 'style="display:none;"' : ''}>✕</button>
+      </div>`;
+    }).join('');
     
     container.querySelectorAll('.row').forEach((row, idx) => {
       const item = pending[section][idx];
@@ -1274,40 +1330,42 @@ function renderSection(section) {
         }
         syncLiabilityExpense(item);
         renderSection('expense');
-        renderStaging();
+        updateSummary(pending);
         saveState();
       });
       
       row.querySelector('.remove').addEventListener('click', () => {
-        const removedName = pending[section][idx].name;
-        pending[section].splice(idx, 1);
-        const expenseIdx = pending.expense.findIndex(e => e.name === removedName);
-        if (expenseIdx !== -1) {
-          pending.expense.splice(expenseIdx, 1);
+        item._removed = true;
+        item._origIndex = idx;
+        const linkedExpense = pending.expense.find(e => e.name === item.name);
+        if (linkedExpense) {
+          linkedExpense._removed = true;
         }
-        pending.cashOnHand -= Number(item.value) || 0;
-        updateCashUI();
-        renderSection('expense');
         renderSection(section);
-        renderStaging();
+        renderSection('expense');
+        updateDirtyFooter();
+        updateSummary(pending);
         saveState();
       });
     });
   } else if (section === 'asset') {
-    container.innerHTML = pending[section].map((item, idx) => 
-      `<div class="row">
-        <input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" />
+    container.innerHTML = pending[section].map((item, idx) => {
+      const diffClass = getRowDiffClass(section, idx);
+      const diffCls = diffClass ? ` ${diffClass}` : '';
+      const removed = item._removed;
+      const removedStyle = removed ? 'style="opacity: 0.5;"' : '';
+      return `<div class="row${diffCls}" ${removedStyle}>
+        <input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" ${removed ? 'disabled' : ''} />
         <span class="rvalue">${fmt(Number(item.value) || 0)}</span>
-        <button class="sell-asset" data-idx="${idx}" title="Продать" aria-label="Продать">Продать</button>
-      </div>`
-    ).join('');
+        <button class="sell-asset" data-idx="${idx}" title="Продать" aria-label="Продать" ${removed ? 'style="display:none;"' : ''}>Продать</button>
+      </div>`;
+    }).join('');
     
     container.querySelectorAll('.row').forEach((row, idx) => {
       const item = pending[section][idx];
       row.querySelector('.rname').value = item.name;
       row.querySelector('.rname').addEventListener('input', e => {
         item.name = e.target.value;
-        renderStaging();
         saveState();
       });
       row.querySelector('.sell-asset').addEventListener('click', () => {
@@ -1315,7 +1373,7 @@ function renderSection(section) {
       });
     });
   } else {
-    container.innerHTML = pending[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency)).join('');
+    container.innerHTML = pending[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency, getRowDiffClass(section, idx), item._removed)).join('');
     container.querySelectorAll('.row').forEach((row, idx) => {
       const item = pending[section][idx];
       row.querySelector('.rname').value = item.name;
@@ -1331,24 +1389,26 @@ function renderSection(section) {
             renderSection(linked);
           }
         }
-        renderStaging();
+        updateSummary(pending);
         saveState();
       });
       row.querySelector('.rvalue').addEventListener('input', e => {
         item.value = Number(e.target.value) || 0;
-        renderStaging();
+        updateSummary(pending);
         saveState();
       });
       row.querySelector('.remove').addEventListener('click', () => {
-        const removedName = pending[section][idx].name;
-        pending[section].splice(idx, 1);
-        const expenseIdx = pending.expense.findIndex(e => e.name === removedName);
-        if (expenseIdx !== -1) {
-          pending.expense.splice(expenseIdx, 1);
+        item._removed = true;
+        item._origIndex = idx;
+        const linkedLiability = pending.liability.find(l => l.name === item.name);
+        if (linkedLiability) {
+          linkedLiability._removed = true;
         }
         renderSection('expense');
         renderSection(section);
-        renderStaging();
+        renderSection('liability');
+        updateDirtyFooter();
+        updateSummary(pending);
         saveState();
       });
     });
@@ -1359,18 +1419,24 @@ function renderStocks() {
   const container = document.getElementById('stocks-rows');
   container.innerHTML = pending.stocks.map((stock, idx) => {
     const total = (Number(stock.price) || 0) * (Number(stock.count) || 0);
-    return `<div class="stock-row">
+    const removed = stock._removed;
+    const status = removed ? 'removed' : getDiffStatus('stocks', stock, idx);
+    const diffClass = status === 'added' ? 'stock-row-diff-added' : status === 'removed' ? 'stock-row-diff-removed' : status === 'modified' ? 'stock-row-diff-modified' : '';
+    const diffCls = diffClass ? ` ${diffClass}` : '';
+    const removedStyle = removed ? 'style="opacity: 0.5;"' : '';
+    return `<div class="stock-row${diffCls}" ${removedStyle}>
       <div class="stock-name">${stock.name}</div>
       <div class="stock-price">${fmt(Number(stock.price) || 0)}</div>
       <div class="stock-count">${Number(stock.count) || 0}</div>
       <div class="stock-total">${fmt(total)}</div>
-      <button class="stock-buy" title="Купить" aria-label="Купить">Купить</button>
-      <button class="stock-sell" title="Продать" aria-label="Продать">Продать</button>
+      <button class="stock-buy" title="Купить" aria-label="Купить" ${removed ? 'style="display:none;"' : ''}>Купить</button>
+      <button class="stock-sell" title="Продать" aria-label="Продать" ${removed ? 'style="display:none;"' : ''}>Продать</button>
     </div>`;
   }).join('');
 
   container.querySelectorAll('.stock-row').forEach((row, idx) => {
     const stock = pending.stocks[idx];
+    if (stock._removed) return;
     const buyBtn = row.querySelector('.stock-buy');
     const sellBtn = row.querySelector('.stock-sell');
 
@@ -1390,17 +1456,26 @@ function syncLinked(sourceSection, removedName) {
   if (!linked) return;
   const idx = pending[linked].findIndex(item => item.name === removedName);
   if (idx !== -1) {
-    pending[linked].splice(idx, 1);
+    pending[linked][idx]._removed = true;
     renderSection(linked);
+    updateSummary(pending);
   }
 }
 
 function syncLiabilityExpense(item) {
+  if (item._removed) {
+    const idx = pending.expense.findIndex(e => e.name === item.name);
+    if (idx !== -1) {
+      pending.expense[idx]._removed = true;
+    }
+    return;
+  }
+  
   const payment = Number(item.payment) || 0;
   const name = item.name;
   
   if (payment > 0 && name) {
-    const existingIdx = pending.expense.findIndex(e => e.name === name);
+    const existingIdx = pending.expense.findIndex(e => e.name === name && !e._removed);
     if (existingIdx >= 0) {
       pending.expense[existingIdx].value = payment;
     } else {
@@ -1409,9 +1484,10 @@ function syncLiabilityExpense(item) {
   } else {
     const idx = pending.expense.findIndex(e => e.name === name);
     if (idx !== -1) {
-      pending.expense.splice(idx, 1);
+      pending.expense[idx]._removed = true;
     }
   }
+  updateSummary(pending);
 }
 
 function syncAllLiabilityExpenses() {
@@ -1428,7 +1504,8 @@ function collectCashflow() {
   const t = calculateFrom(pending);
   pending.cashOnHand += t.cashflow;
   updateCashUI();
-  renderStaging();
+  updateDirtyFooter();
+  updateSummary(pending);
   saveState();
 }
 
@@ -1436,7 +1513,8 @@ function quitJob() {
   const t = calculateFrom(pending);
   pending.cashOnHand -= t.totalExpense;
   updateCashUI();
-  renderStaging();
+  updateDirtyFooter();
+  updateSummary(pending);
   saveState();
 }
 
@@ -1446,7 +1524,8 @@ function addCash() {
   const num = Number(raw) || 0;
   pending.cashOnHand += num;
   updateCashUI();
-  renderStaging();
+  updateDirtyFooter();
+  updateSummary(pending);
   saveState();
 }
 
@@ -1456,7 +1535,8 @@ function removeCash() {
   const num = Number(raw) || 0;
   pending.cashOnHand -= num;
   updateCashUI();
-  renderStaging();
+  updateDirtyFooter();
+  updateSummary(pending);
   saveState();
 }
 
@@ -1493,7 +1573,6 @@ function confirmTakeLoan() {
   overlay.classList.remove('visible');
   renderAll();
   updateCashUI();
-  renderStaging();
   saveState();
   
   const liabilityContainer = document.getElementById('liability-rows');
@@ -1561,7 +1640,6 @@ function confirmBuyAsset() {
   overlay.classList.remove('visible');
   renderAll();
   updateCashUI();
-  renderStaging();
   saveState();
   checkEscape();
   buyAssetIndex = -1;
@@ -1603,14 +1681,14 @@ function confirmSellAsset() {
   if (price <= 0) { priceInput.focus(); return; }
 
   if (sellAssetIndex >= 0 && sellAssetIndex < pending.asset.length) {
-    pending.asset.splice(sellAssetIndex, 1);
+    pending.asset[sellAssetIndex]._removed = true;
   }
   pending.cashOnHand += price;
 
   overlay.classList.remove('visible');
   renderAll();
   updateCashUI();
-  renderStaging();
+  updateDirtyFooter();
   saveState();
   checkEscape();
   sellAssetIndex = -1;
@@ -1624,16 +1702,23 @@ function cancelSellAsset() {
 function renderProperties() {
   const container = document.getElementById('property-rows');
   container.innerHTML = pending.property.map((prop, idx) => {
-    return `<div class="stock-row">
+    const removed = prop._removed;
+    const status = removed ? 'removed' : getDiffStatus('property', prop, idx);
+    const diffClass = status === 'added' ? 'stock-row-diff-added' : status === 'removed' ? 'stock-row-diff-removed' : status === 'modified' ? 'stock-row-diff-modified' : '';
+    const diffCls = diffClass ? ` ${diffClass}` : '';
+    const removedStyle = removed ? 'style="opacity: 0.5;"' : '';
+    return `<div class="stock-row${diffCls}" ${removedStyle}>
       <div class="stock-name">${prop.name}</div>
       <div class="stock-price">${fmt(Number(prop.down) || 0)}</div>
       <div class="stock-count">${fmt(Number(prop.mortgage) || 0)}</div>
       <div class="stock-total">${fmt(Number(prop.cashflow) || 0)}</div>
-      <button class="stock-sell" title="Продать" aria-label="Продать">Продать</button>
+      <button class="stock-sell" title="Продать" aria-label="Продать" ${removed ? 'style="display:none;"' : ''}>Продать</button>
     </div>`;
   }).join('');
 
   container.querySelectorAll('.stock-row').forEach((row, idx) => {
+    const prop = pending.property[idx];
+    if (prop._removed) return;
     row.querySelector('.stock-sell').addEventListener('click', () => openSellProperty(idx));
   });
 }
@@ -1668,27 +1753,27 @@ function confirmSellProperty() {
     const mortgage = Number(prop.mortgage) || 0;
     pending.cashOnHand += salePrice - mortgage;
 
+    prop._removed = true;
+
     const liabilityIdx = pending.liability.findIndex(l => l.name === prop.name);
     if (liabilityIdx !== -1) {
-      pending.liability.splice(liabilityIdx, 1);
+      pending.liability[liabilityIdx]._removed = true;
     }
     const expenseIdx = pending.expense.findIndex(e => e.name === prop.name);
     if (expenseIdx !== -1) {
-      pending.expense.splice(expenseIdx, 1);
+      pending.expense[expenseIdx]._removed = true;
     }
 
     const passiveIdx = pending.passive.findIndex(p => p.name === prop.name);
     if (passiveIdx !== -1) {
-      pending.passive.splice(passiveIdx, 1);
+      pending.passive[passiveIdx]._removed = true;
     }
-
-    pending.property.splice(sellPropertyIndex, 1);
   }
 
   overlay.classList.remove('visible');
   renderAll();
   updateCashUI();
-  renderStaging();
+  updateDirtyFooter();
   saveState();
   checkEscape();
   sellPropertyIndex = -1;
@@ -1789,7 +1874,6 @@ function confirmBuyProperty() {
   overlay.classList.remove('visible');
   renderAll();
   updateCashUI();
-  renderStaging();
   saveState();
   checkEscape();
 }
@@ -1860,7 +1944,6 @@ function confirmBuyStocks() {
   overlay.classList.remove('visible');
   renderAll();
   updateCashUI();
-  renderStaging();
   saveState();
   checkEscape();
   buyStockIndex = -1;
@@ -1939,7 +2022,7 @@ function confirmSellStocks() {
     const stock = pending.stocks[sellStockIndex];
     const currentCount = Number(stock.count) || 0;
     if (finalCount >= currentCount) {
-      pending.stocks.splice(sellStockIndex, 1);
+      stock._removed = true;
     } else {
       stock.count = currentCount - finalCount;
     }
@@ -1950,7 +2033,6 @@ function confirmSellStocks() {
   overlay.classList.remove('visible');
   renderAll();
   updateCashUI();
-  renderStaging();
   saveState();
   checkEscape();
   sellStockIndex = -1;
@@ -2060,7 +2142,6 @@ function buyDeal(type, idx) {
   pending.passive.push({name: deal.name + ' (доход)', value: deal.income});
   renderAll();
   updateCashUI();
-  renderStaging();
   saveState();
   checkEscape();
 }
@@ -2074,7 +2155,6 @@ function escapeRatRace() {
   document.getElementById('transition-overlay').classList.remove('visible');
   fastTrackMultiplier = 1;
   updateCashUI();
-  renderStaging();
   saveState();
   checkEscape();
 }
@@ -2096,12 +2176,18 @@ function renderAll() {
     else if (section === 'property') renderProperties();
     else renderSection(section);
   });
+  updateDirtyFooter();
+  updateSummary(pending);
+  updateSectionHighlights();
 }
 
 function addEmpty(section) {
   if (section === 'stocks') {
     pending.stocks.push({name:'', price:0, count:0});
     renderStocks();
+    updateDirtyFooter();
+    updateSummary(pending);
+    saveState();
   } else if (section === 'liability') {
     takeLoanModal();
     return;
@@ -2114,8 +2200,10 @@ function addEmpty(section) {
   } else {
     pending[section].push({name:'', value:0});
     renderSection(section);
+    updateDirtyFooter();
+    updateSummary(pending);
+    saveState();
   }
-  renderStaging();
   const meta = sectionMeta[section];
   const last = document.getElementById(meta.id).lastElementChild;
   if (last) {
@@ -2125,11 +2213,11 @@ function addEmpty(section) {
 }
 
 function calculateFrom(state) {
-  const totalPassive = state.passive.reduce((s,i)=>s+(Number(i.value)||0),0);
-  const totalIncome = state.income.reduce((s,i)=>s+(Number(i.value)||0),0) + totalPassive;
-  const totalExpense = state.expense.reduce((s,i)=>s+(Number(i.value)||0),0);
-  const totalAssets = state.asset.reduce((s,i)=>s+(Number(i.value)||0),0) + state.property.reduce((s,i)=>s+(Number(i.down)||0)+(Number(i.mortgage)||0),0);
-  const totalLiabilities = state.liability.reduce((s,i)=>s+(Number(i.value)||0),0);
+  const totalPassive = state.passive.filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0);
+  const totalIncome = state.income.filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0) + totalPassive;
+  const totalExpense = state.expense.filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0);
+  const totalAssets = state.asset.filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0) + state.property.filter(i => !i._removed).reduce((s,i)=>s+(Number(i.down)||0)+(Number(i.mortgage)||0),0);
+  const totalLiabilities = state.liability.filter(i => !i._removed).reduce((s,i)=>s+(Number(i.value)||0),0);
   const cashflow = (totalIncome - totalExpense) * fastTrackMultiplier;
   const netWorth = totalAssets - totalLiabilities;
   return { totalIncome, totalExpense, totalPassive, totalAssets, totalLiabilities, cashflow, netWorth, cashOnHand: state.cashOnHand || 0 };
@@ -2137,6 +2225,8 @@ function calculateFrom(state) {
 
 function updateSummary(state) {
   const t = calculateFrom(state);
+  const c = calculateFrom(committed);
+  
   document.getElementById('total-income').textContent = fmt(t.totalIncome);
   document.getElementById('total-expenses').textContent = fmt(t.totalExpense);
   document.getElementById('total-passive').textContent = fmt(t.totalPassive);
@@ -2145,6 +2235,13 @@ function updateSummary(state) {
   cfEl.className = 'value ' + (t.cashflow > 0 ? 'positive' : t.cashflow < 0 ? 'negative' : 'neutral');
   document.getElementById('net-worth').textContent = fmt(t.netWorth);
   document.getElementById('cash-on-hand').textContent = fmt(state.cashOnHand);
+  
+  updateChangeIndicator('change-total-income', t.totalIncome, c.totalIncome, 'income');
+  updateChangeIndicator('change-total-expenses', t.totalExpense, c.totalExpense, 'expense');
+  updateChangeIndicator('change-total-passive', t.totalPassive, c.totalPassive, 'income');
+  updateChangeIndicator('change-cashflow', t.cashflow, c.cashflow, 'income');
+  updateChangeIndicator('change-cash-on-hand', state.cashOnHand, committed.cashOnHand, 'neutral');
+  updateChangeIndicator('change-net-worth', t.netWorth, c.netWorth, 'income');
 
   const balance = t.totalIncome + t.totalExpense;
   const pct = balance > 0 ? Math.max(0, Math.min(100, (t.totalIncome / balance) * 100)) : 50;
@@ -2159,188 +2256,159 @@ function updateSummary(state) {
   checkEscape();
 }
 
-function computeDiff() {
-  const diffs = [];
-  const sections = Object.keys(sectionMeta);
-
-  for (const section of sections) {
-    if (section === 'property') continue;
-    const committedItems = committed[section];
-    const pendingItems = pending[section];
-
-    const cUsed = new Array(committedItems.length).fill(false);
-    const pUsed = new Array(pendingItems.length).fill(false);
-
-    for (let pi = 0; pi < pendingItems.length; pi++) {
-      for (let ci = 0; ci < committedItems.length; ci++) {
-        if (!cUsed[ci] && !pUsed[pi] && committedItems[ci].name === pendingItems[pi].name && committedItems[ci].value === pendingItems[pi].value) {
-          cUsed[ci] = true;
-          pUsed[pi] = true;
-          break;
-        }
-      }
-    }
-
-    for (let pi = 0; pi < pendingItems.length; pi++) {
-      if (pUsed[pi]) continue;
-      for (let ci = 0; ci < committedItems.length; ci++) {
-        if (!cUsed[ci] && !pUsed[pi] && committedItems[ci].name === pendingItems[pi].name) {
-          cUsed[ci] = true;
-          pUsed[pi] = true;
-          diffs.push({type:'modified', section, text: `~ ${committedItems[ci].name}: ${fmt(committedItems[ci].value)} → ${fmt(pendingItems[pi].value)}`});
-          break;
-        }
-      }
-    }
-
-    for (let ci = 0; ci < committedItems.length; ci++) {
-      if (!cUsed[ci]) {
-        diffs.push({type:'removed', section, text: `- ${committedItems[ci].name || '(без названия)'} = ${fmt(committedItems[ci].value)}`});
-      }
-    }
-
-    for (let pi = 0; pi < pendingItems.length; pi++) {
-      if (!pUsed[pi]) {
-        diffs.push({type:'added', section, text: `+ ${pendingItems[pi].name || '(без названия)'} = ${fmt(pendingItems[pi].value)}`});
-      }
-    }
+function updateChangeIndicator(elementId, newValue, oldValue, type) {
+  const el = document.getElementById(elementId);
+  const diff = newValue - oldValue;
+  
+  if (diff === 0) {
+    el.textContent = '';
+    el.className = 'change';
+    return;
   }
-
-  const committedTotals = calculateFrom(committed);
-  const pendingTotals = calculateFrom(pending);
-
-  const aggregates = [
-    {key:'totalExpense', label:'Общие расходы'},
-    {key:'totalIncome', label:'Общий доход'},
-    {key:'totalPassive', label:'Пассивный доход'},
-    {key:'cashflow', label:'Денежный поток'},
-    {key:'totalAssets', label:'Общие активы'},
-    {key:'totalLiabilities', label:'Общие пассивы'},
-    {key:'netWorth', label:'Чистые активы'},
-    {key:'cashOnHand', label:'Наличность'}
-  ];
-
-  for (const a of aggregates) {
-    if (committedTotals[a.key] !== pendingTotals[a.key]) {
-      diffs.push({type:'modified', section:'_agg', text: `~ ${a.label}: ${fmt(committedTotals[a.key])} → ${fmt(pendingTotals[a.key])}`});
-    }
-  }
-
-  const committedStocks = committed.stocks || [];
-  const pendingStocks = pending.stocks || [];
-  const cUsedStocks = new Array(committedStocks.length).fill(false);
-  const pUsedStocks = new Array(pendingStocks.length).fill(false);
-
-  for (let pi = 0; pi < pendingStocks.length; pi++) {
-    for (let ci = 0; ci < committedStocks.length; ci++) {
-      if (!cUsedStocks[ci] && !pUsedStocks[pi] && committedStocks[ci].name === pendingStocks[pi].name && committedStocks[ci].price * committedStocks[ci].count === pendingStocks[pi].price * pendingStocks[pi].count) {
-        cUsedStocks[ci] = true;
-        pUsedStocks[pi] = true;
-        break;
-      }
-    }
-  }
-
-  for (let pi = 0; pi < pendingStocks.length; pi++) {
-    if (pUsedStocks[pi]) continue;
-    for (let ci = 0; ci < committedStocks.length; ci++) {
-      if (!cUsedStocks[ci] && !pUsedStocks[pi] && committedStocks[ci].name === pendingStocks[pi].name) {
-        cUsedStocks[ci] = true;
-        pUsedStocks[pi] = true;
-        diffs.push({type:'modified', section:'stocks', text: `~ ${committedStocks[ci].name}: ${Number(committedStocks[ci].count)||0} шт → ${Number(pendingStocks[pi].count)||0} шт`});
-        break;
-      }
-    }
-  }
-
-  for (let ci = 0; ci < committedStocks.length; ci++) {
-    if (!cUsedStocks[ci]) {
-      diffs.push({type:'removed', section:'stocks', text: `- ${committedStocks[ci].name || '(без названия)'} = ${Number(committedStocks[ci].count)||0} шт`});
-    }
-  }
-
-  for (let pi = 0; pi < pendingStocks.length; pi++) {
-    if (!pUsedStocks[pi]) {
-      diffs.push({type:'added', section:'stocks', text: `+ ${pendingStocks[pi].name || '(без названия)'} = ${Number(pendingStocks[pi].count)||0} шт`});
-    }
-  }
-
-  const committedProperties = committed.property || [];
-  const pendingProperties = pending.property || [];
-  const cUsedProps = new Array(committedProperties.length).fill(false);
-  const pUsedProps = new Array(pendingProperties.length).fill(false);
-
-  for (let pi = 0; pi < pendingProperties.length; pi++) {
-    for (let ci = 0; ci < committedProperties.length; ci++) {
-      if (!cUsedProps[ci] && !pUsedProps[pi] && committedProperties[ci].name === pendingProperties[pi].name &&
-          (Number(committedProperties[ci].down)||0) === (Number(pendingProperties[pi].down)||0) &&
-          (Number(committedProperties[ci].mortgage)||0) === (Number(pendingProperties[pi].mortgage)||0) &&
-          (Number(committedProperties[ci].cashflow)||0) === (Number(pendingProperties[pi].cashflow)||0)) {
-        cUsedProps[ci] = true;
-        pUsedProps[pi] = true;
-        break;
-      }
-    }
-  }
-
-  for (let pi = 0; pi < pendingProperties.length; pi++) {
-    if (pUsedProps[pi]) continue;
-    for (let ci = 0; ci < committedProperties.length; ci++) {
-      if (!cUsedProps[ci] && !pUsedProps[pi] && committedProperties[ci].name === pendingProperties[pi].name) {
-        cUsedProps[ci] = true;
-        pUsedProps[pi] = true;
-        diffs.push({type:'modified', section:'property', text: `~ ${committedProperties[ci].name}: перв.взнос ${fmt(committedProperties[ci].down)} → ${fmt(pendingProperties[pi].down)}, ипотека ${fmt(committedProperties[ci].mortgage)} → ${fmt(pendingProperties[pi].mortgage)}, доход ${fmt(committedProperties[ci].cashflow)} → ${fmt(pendingProperties[pi].cashflow)}`});
-        break;
-      }
-    }
-  }
-
-  for (let ci = 0; ci < committedProperties.length; ci++) {
-    if (!cUsedProps[ci]) {
-      diffs.push({type:'removed', section:'property', text: `- ${committedProperties[ci].name || '(без названия)'}`});
-    }
-  }
-
-  for (let pi = 0; pi < pendingProperties.length; pi++) {
-    if (!pUsedProps[pi]) {
-      diffs.push({type:'added', section:'property', text: `+ ${pendingProperties[pi].name || '(без названия)'}`});
-    }
-  }
-
-  return diffs;
+  
+  const diffFmt = fmt(Math.abs(diff));
+  const sign = diff > 0 ? '+' : '';
+  const isGood = (type === 'income' && diff > 0) || (type === 'expense' && diff < 0) || (type === 'neutral' && diff > 0);
+  const colorClass = isGood ? 'positive' : 'negative';
+  
+  el.innerHTML = `${fmt(oldValue)} <span style="color:${isGood ? 'var(--green)' : 'var(--red)'}">${sign}${fmt(diff)}</span> = ${fmt(newValue)}`;
+  el.className = 'change ' + colorClass;
 }
 
-function renderStaging() {
-  const diffs = computeDiff();
-  const list = document.getElementById('staging-list');
-  const actions = document.getElementById('staging-actions');
-  const indicator = document.getElementById('dirty-indicator');
-  
-  if (diffs.length === 0) {
-    list.innerHTML = '<div class="staging-empty">Нет изменений</div>';
-    actions.style.display = 'none';
-    indicator.style.display = 'none';
+function hasChanges() {
+  const sections = Object.keys(sectionMeta);
+  for (const section of sections) {
+    if (section === 'property') {
+      const cProps = committed.property || [];
+      const pProps = pending.property || [];
+      const pActive = pProps.filter(p => !p._removed);
+      if (cProps.length !== pActive.length) return true;
+      for (let i = 0; i < pActive.length; i++) {
+        if (getDiffStatus(section, pActive[i], i) !== null) return true;
+      }
+      if (pProps.some(p => p._removed)) return true;
+    } else if (section === 'stocks') {
+      const cStocks = committed.stocks || [];
+      const pStocks = pending.stocks || [];
+      const pActive = pStocks.filter(p => !p._removed);
+      if (cStocks.length !== pActive.length) return true;
+      for (let i = 0; i < pActive.length; i++) {
+        if (getDiffStatus(section, pActive[i], i) !== null) return true;
+      }
+      if (pStocks.some(p => p._removed)) return true;
+    } else {
+      const cItems = committed[section];
+      const pItems = pending[section];
+      const pActive = pItems.filter(p => !p._removed);
+      if (cItems.length !== pActive.length) return true;
+      for (let i = 0; i < pActive.length; i++) {
+        if (getDiffStatus(section, pActive[i], i) !== null) return true;
+      }
+      if (pItems.some(p => p._removed)) return true;
+    }
+  }
+  return committed.cashOnHand !== pending.cashOnHand;
+}
+
+function updateDirtyFooter() {
+  const footer = document.getElementById('dirty-footer');
+  if (hasChanges()) {
+    footer.classList.add('visible');
   } else {
-    list.innerHTML = diffs.map(d => {
-      const cls = d.type === 'added' ? 'diff-added' : d.type === 'removed' ? 'diff-removed' : 'diff-modified';
-      const op = d.type === 'added' ? '+' : d.type === 'removed' ? '-' : '~';
-      const sectionLabel = d.section === '_agg' ? 'Итого' : sectionMeta[d.section].label;
-      return `<div class="diff-line ${cls}"><span class="diff-section">[${sectionLabel}]</span> <span class="diff-op">${op}</span> <span>${d.text}</span></div>`;
-    }).join('');
-    actions.style.display = 'flex';
-    indicator.style.display = 'inline';
+    footer.classList.remove('visible');
+  }
+  updateSectionHighlights();
+}
+
+function updateSectionHighlights() {
+  const sections = Object.keys(sectionMeta);
+  for (const section of sections) {
+    const meta = sectionMeta[section];
+    const card = document.getElementById(meta.id).closest('.card');
+    if (!card) continue;
+    
+    let hasSectionChanges = false;
+    
+    if (section === 'property') {
+      const cProps = committed.property || [];
+      const pProps = pending.property || [];
+      const pActive = pProps.filter(p => !p._removed);
+      hasSectionChanges = cProps.length !== pActive.length || pProps.some(p => p._removed);
+      if (!hasSectionChanges) {
+        for (let i = 0; i < pActive.length; i++) {
+          if (getDiffStatus(section, pActive[i], i) !== null) {
+            hasSectionChanges = true;
+            break;
+          }
+        }
+      }
+    } else if (section === 'stocks') {
+      const cStocks = committed.stocks || [];
+      const pStocks = pending.stocks || [];
+      const pActive = pStocks.filter(p => !p._removed);
+      hasSectionChanges = cStocks.length !== pActive.length || pStocks.some(p => p._removed);
+      if (!hasSectionChanges) {
+        for (let i = 0; i < pActive.length; i++) {
+          if (getDiffStatus(section, pActive[i], i) !== null) {
+            hasSectionChanges = true;
+            break;
+          }
+        }
+      }
+    } else {
+      const cItems = committed[section];
+      const pItems = pending[section];
+      const pActive = pItems.filter(p => !p._removed);
+      hasSectionChanges = cItems.length !== pActive.length || pItems.some(p => p._removed);
+      if (!hasSectionChanges) {
+        for (let i = 0; i < pActive.length; i++) {
+          if (getDiffStatus(section, pActive[i], i) !== null) {
+            hasSectionChanges = true;
+            break;
+          }
+        }
+      }
+    }
+    
+    if (hasSectionChanges) {
+      card.classList.add('has-changes');
+    } else {
+      card.classList.remove('has-changes');
+    }
   }
 }
 
 function commit() {
   if (pending.cashOnHand < 0) {
     alert('Невозможно подтвердить изменения: наличность не может быть отрицательной.');
-    renderStaging();
     return;
   }
-  committed = cloneState(pending);
-  updateSummary(committed);
-  renderStaging();
+  
+  const cleanedPending = {
+    income: pending.income.filter(i => !i._removed),
+    expense: pending.expense.filter(i => !i._removed),
+    asset: pending.asset.filter(i => !i._removed),
+    liability: pending.liability.filter(i => !i._removed),
+    passive: pending.passive.filter(i => !i._removed),
+    stocks: pending.stocks.filter(i => !i._removed),
+    property: pending.property.filter(i => !i._removed),
+    cashOnHand: pending.cashOnHand
+  };
+  
+  cleanedPending.income.forEach(i => delete i._removed);
+  cleanedPending.expense.forEach(i => delete i._removed);
+  cleanedPending.asset.forEach(i => delete i._removed);
+  cleanedPending.liability.forEach(i => delete i._removed);
+  cleanedPending.passive.forEach(i => delete i._removed);
+  cleanedPending.stocks.forEach(i => delete i._removed);
+  cleanedPending.property.forEach(i => delete i._removed);
+  
+  committed = cloneState(cleanedPending);
+  pending = cloneState(cleanedPending);
+  
+  renderAll();
+  updateSummary(pending);
+  updateDirtyFooter();
   saveState();
   checkEscape();
 }
@@ -2348,10 +2416,130 @@ function commit() {
 function revert() {
   pending = cloneState(committed);
   renderAll();
-  updateSummary(committed);
-  renderStaging();
+  updateSummary(pending);
+  updateDirtyFooter();
   saveState();
 }
+
+function getDiffStatus(section, item, idx) {
+  const committedItems = committed[section];
+  const pendingItems = (pending[section] || []).filter(i => !i._removed);
+
+  if (section === 'stocks') {
+    const cStocks = committed.stocks || [];
+    const pStocks = (pending.stocks || []).filter(i => !i._removed);
+    const cUsed = new Array(cStocks.length).fill(false);
+    const pUsed = new Array(pStocks.length).fill(false);
+
+    for (let pi = 0; pi < pStocks.length; pi++) {
+      for (let ci = 0; ci < cStocks.length; ci++) {
+        if (!cUsed[ci] && !pUsed[pi] && cStocks[ci].name === pStocks[pi].name && cStocks[ci].price * cStocks[ci].count === pStocks[pi].price * pStocks[pi].count) {
+          cUsed[ci] = true;
+          pUsed[pi] = true;
+          break;
+        }
+      }
+    }
+
+    const pStatuses = new Array(pStocks.length).fill(null);
+    for (let pi = 0; pi < pStocks.length; pi++) {
+      if (pUsed[pi]) continue;
+      let found = false;
+      for (let ci = 0; ci < cStocks.length; ci++) {
+        if (!cUsed[ci] && cStocks[ci].name === pStocks[pi].name) {
+          cUsed[ci] = true;
+          pUsed[pi] = true;
+          pStatuses[pi] = 'modified';
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        pStatuses[pi] = 'added';
+      }
+    }
+
+    const actualIdx = (pending.stocks || []).filter(i => !i._removed).indexOf(item);
+    return actualIdx >= 0 && actualIdx < pStatuses.length ? pStatuses[actualIdx] : null;
+  }
+
+  if (section === 'property') {
+    const cProps = committed.property || [];
+    const pProps = (pending.property || []).filter(i => !i._removed);
+    const cUsed = new Array(cProps.length).fill(false);
+    const pUsed = new Array(pProps.length).fill(false);
+
+    for (let pi = 0; pi < pProps.length; pi++) {
+      for (let ci = 0; ci < cProps.length; ci++) {
+        if (!cUsed[ci] && !pUsed[pi] && cProps[ci].name === pProps[pi].name &&
+            (Number(cProps[ci].down)||0) === (Number(pProps[pi].down)||0) &&
+            (Number(cProps[ci].mortgage)||0) === (Number(pProps[pi].mortgage)||0) &&
+            (Number(cProps[ci].cashflow)||0) === (Number(pProps[pi].cashflow)||0)) {
+          cUsed[ci] = true;
+          pUsed[pi] = true;
+          break;
+        }
+      }
+    }
+
+    const pStatuses = new Array(pProps.length).fill(null);
+    for (let pi = 0; pi < pProps.length; pi++) {
+      if (pUsed[pi]) continue;
+      let found = false;
+      for (let ci = 0; ci < cProps.length; ci++) {
+        if (!cUsed[ci] && cProps[ci].name === pProps[pi].name) {
+          cUsed[ci] = true;
+          pUsed[pi] = true;
+          pStatuses[pi] = 'modified';
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        pStatuses[pi] = 'added';
+      }
+    }
+
+    const actualIdx = (pending.property || []).filter(i => !i._removed).indexOf(item);
+    return actualIdx >= 0 && actualIdx < pStatuses.length ? pStatuses[actualIdx] : null;
+  }
+
+  const cUsed = new Array(committedItems.length).fill(false);
+  const pUsed = new Array(pendingItems.length).fill(false);
+
+  for (let pi = 0; pi < pendingItems.length; pi++) {
+    for (let ci = 0; ci < committedItems.length; ci++) {
+      if (!cUsed[ci] && !pUsed[pi] && committedItems[ci].name === pendingItems[pi].name && committedItems[ci].value === pendingItems[pi].value) {
+        cUsed[ci] = true;
+        pUsed[pi] = true;
+        break;
+      }
+    }
+  }
+
+  const pStatuses = new Array(pendingItems.length).fill(null);
+  for (let pi = 0; pi < pendingItems.length; pi++) {
+    if (pUsed[pi]) continue;
+    let found = false;
+    for (let ci = 0; ci < committedItems.length; ci++) {
+      if (!cUsed[ci] && committedItems[ci].name === pendingItems[pi].name) {
+        cUsed[ci] = true;
+        pUsed[pi] = true;
+        pStatuses[pi] = 'modified';
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      pStatuses[pi] = 'added';
+    }
+  }
+
+  const actualIdx = pendingItems.indexOf(item);
+  return actualIdx >= 0 && actualIdx < pStatuses.length ? pStatuses[actualIdx] : null;
+}
+
+
 
 function loadProfession(key) {
   const p = PROFESSIONS[key] || FAST_TRACK_PROFESSIONS[key];
@@ -2370,8 +2558,7 @@ function loadProfession(key) {
   pending = cloneState(base);
   syncAllLiabilityExpenses();
   renderAll();
-  updateSummary(committed);
-  renderStaging();
+  updateSummary(pending);
   saveState();
   
   if (FAST_TRACK_PROFESSIONS[key]) {
@@ -2394,8 +2581,7 @@ function reset() {
   loanInterestRate = 10;
   mortgageInterestRate = 0;
   renderAll();
-  updateSummary(committed);
-  renderStaging();
+  updateSummary(pending);
   saveState();
 }
 
@@ -2414,14 +2600,15 @@ document.querySelectorAll('.category-add').forEach(btn => {
   });
 });
 
-document.getElementById('commit').addEventListener('click', commit);
-document.getElementById('revert').addEventListener('click', revert);
+
 document.getElementById('go-fast-track').addEventListener('click', escapeRatRace);
 document.getElementById('restart-game').addEventListener('click', restartGame);
 document.getElementById('collect-cashflow').addEventListener('click', collectCashflow);
 document.getElementById('quit-job').addEventListener('click', quitJob);
 document.getElementById('add-cash').addEventListener('click', addCash);
 document.getElementById('remove-cash').addEventListener('click', removeCash);
+document.getElementById('commit').addEventListener('click', commit);
+document.getElementById('revert').addEventListener('click', revert);
 document.getElementById('confirm-buy-property').addEventListener('click', confirmBuyProperty);
 document.getElementById('cancel-buy-property').addEventListener('click', cancelBuyProperty);
 document.getElementById('confirm-buy-stocks').addEventListener('click', confirmBuyStocks);
@@ -2466,7 +2653,6 @@ if (!loadState()) {
   syncAllLiabilityExpenses();
   renderAll();
   updateSummary(pending);
-  renderStaging();
 }
 </script>
 </body>
