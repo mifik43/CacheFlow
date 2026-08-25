@@ -130,7 +130,7 @@
     .row .remove { flex: 0 0 36px; height: 36px; font-size: 16px; width: auto; margin-top: 0; }
   }
   @media (max-width: 900px) {
-    .col-6, .col-4, .col-3 { grid-column: span 12; }
+    .col-6, .col-4, .col-3, .col-8 { grid-column: span 12; }
   }
 
 
@@ -263,28 +263,39 @@
   .custom-row { animation: fadeIn 0.2s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
 
-  .dirty-footer {
+  .dirty-header {
     display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    position: sticky;
+    top: 0;
+    z-index: 998;
     background: #0b1220;
-    border-top: 1px solid var(--amber);
-    padding: 12px 24px;
-    z-index: 999;
+    border-bottom: 1px solid var(--amber);
+    padding: 10px 24px;
     justify-content: center;
     align-items: center;
     gap: 12px;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
   }
-  .dirty-footer.visible { display: flex; }
-  .dirty-footer .dirty-label {
+  .dirty-header.visible { display: flex; }
+  .dirty-header .dirty-label {
     font-size: 14px;
     font-weight: 600;
     color: var(--amber);
     margin-right: 8px;
   }
+  .dirty-header button {
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .dirty-header .primary {
+    background: var(--accent);
+    color: #0f172a;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .dirty-header button:hover { border-color: var(--accent); }
 
   .game-banner {
     display: none;
@@ -484,8 +495,24 @@
   .transition-modal p { color: var(--muted); margin: 0 0 20px 0; }
   .settings-modal label { font-size: 14px; color: var(--muted); display: block; margin-bottom: 6px; }
   .settings-modal input { margin-bottom: 14px; }
-  .cash-actions button { font-size: 13px; padding: 8px 12px; }
+  .cash-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .cash-actions button {
+    font-size: 15px;
+    padding: 12px 10px;
+    min-height: 48px;
+    width: 100%;
+  }
   .cash-actions button:hover { border-color: var(--accent); }
+  .cash-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
   .bar-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
   .deals-section { display: none; }
   .deals-grid { grid-template-columns: repeat(12, 1fr); gap: 16px; }
@@ -655,19 +682,39 @@
     text-align: center;
   }
 
-  @media (max-width: 640px) {
-    .data-table th,
-    .data-table td {
-      padding: 4px 6px;
-      font-size: 12px;
-    }
-    .data-table .rname,
-    .data-table .rvalue,
-    .data-table .rpayment {
-      padding: 4px 6px;
-      font-size: 12px;
-    }
-  }
+   @media (max-width: 640px) {
+     .data-table th,
+     .data-table td {
+       padding: 4px 6px;
+       font-size: 12px;
+     }
+     .data-table .rname,
+     .data-table .rvalue,
+     .data-table .rpayment {
+       padding: 4px 6px;
+       font-size: 12px;
+     }
+     .cash-actions {
+       gap: 8px;
+     }
+     .cash-actions button {
+       font-size: 14px;
+       padding: 10px 8px;
+       min-height: 44px;
+     }
+     .dirty-header {
+       padding: 8px 12px;
+       gap: 8px;
+     }
+     .dirty-header .dirty-label {
+       font-size: 12px;
+       margin-right: 6px;
+     }
+     .dirty-header button {
+       font-size: 12px;
+       padding: 6px 10px;
+     }
+   }
 </style>
 </head>
 <body>
@@ -705,75 +752,94 @@
       <button id="settings-btn">⚙️ Настройки</button>
     </div>
   </header>
+  <div id="dirty-header" class="dirty-header">
+    <span class="dirty-label">● Есть незафиксированные изменения</span>
+    <button class="primary" id="commit-top">Подтвердить</button>
+    <button id="revert-top">Отменить</button>
+  </div>
   <div id="game-banner" class="game-banner rat-race">Крысиные бега: пассивный доход должен превысить расходы для побега</div>
       <div class="escape-progress"><i id="escape-indicator"></i></div>
 
   <div class="grid">
-    <section class="card col-12">
-      <h2>Итоги</h2>
+    <section class="card col-4">
+      <h2>Наличность и операции</h2>
       <div class="summary">
-        <div class="metric">
-          <div class="name">Общий доход</div>
-          <div class="value neutral" id="total-income">0 ₽</div>
-          <div class="change" id="change-total-income"></div>
-        </div>
-        <div class="metric">
-          <div class="name">Общие расходы</div>
-          <div class="value negative" id="total-expenses">0 ₽</div>
-          <div class="change" id="change-total-expenses"></div>
-        </div>
-        <div class="metric">
-          <div class="name">Пассивный доход</div>
-          <div class="value positive" id="total-passive">0 ₽</div>
-          <div class="change" id="change-total-passive"></div>
-        </div>
-        <div class="metric">
-          <div class="name">Денежный поток</div>
-          <div class="value" id="cashflow">0 ₽</div>
-          <div class="change" id="change-cashflow"></div>
-        </div>
         <div class="metric">
           <div class="name">Наличность</div>
           <div class="value neutral" id="cash-on-hand">0 ₽</div>
           <div class="change" id="change-cash-on-hand"></div>
         </div>
         <div class="metric">
-          <div class="name">Чистые активы</div>
-          <div class="value positive" id="net-worth">0 ₽</div>
-          <div class="change" id="change-net-worth"></div>
+          <div class="name">Денежный поток</div>
+          <div class="value" id="cashflow">0 ₽</div>
+          <div class="change" id="change-cashflow"></div>
         </div>
       </div>
       <div class="cash-actions">
-        <button id="collect-cashflow">💰 Получить денежный поток</button>
-        <button id="quit-job">🚪 Уволиться</button>
-        <button id="add-cash">➕ Добавить наличность</button>
-        <button id="remove-cash">➖ Удалить наличность</button>
-      </div>
-      <div class="bar-wrap">
-        <div class="bar-labels">
-          <span>Расходы</span>
-          <span>Доходы + Пассив</span>
+        <div class="cash-col">
+          <button id="collect-cashflow">💰 Получить денежный поток</button>
+          <button id="quit-job">🚪 Уволиться</button>
         </div>
-        <div class="bar"><i id="balance-indicator"></i></div>
-        <div class="hint" id="status-text">Введите данные, чтобы увидеть расчёт</div>
+        <div class="cash-col">
+          <button id="add-cash">➕ Добавить наличность</button>
+          <button id="remove-cash">➖ Удалить наличность</button>
+        </div>
       </div>
-
     </section>
 
-    <section class="card col-12">
-      <h2>Доходы (в месяц)</h2>
+    <section class="card col-6">
+      <h2>Недвижимость</h2>
       <div class="card-content">
         <table class="data-table">
           <thead>
             <tr>
               <th>Название</th>
+              <th>Первый взнос (₽)</th>
+              <th>Ипотека (₽)</th>
+              <th>Денежный поток (₽)</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody id="property-rows"></tbody>
+        </table>
+        <button class="category-add" data-section="property">+ Купить недвижимость</button>
+      </div>
+    </section>
+
+    <section class="card col-6">
+      <h2>Акции</h2>
+      <div class="card-content">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Цена (₽)</th>
+              <th>Кол-во</th>
+              <th>Сумма (₽)</th>
+              <th class="actions-col">Действия</th>
+            </tr>
+          </thead>
+          <tbody id="stocks-rows"></tbody>
+        </table>
+        <button class="category-add" data-section="stocks">+ Купить акции</button>
+      </div>
+    </section>
+
+    <section class="card col-6">
+      <h2>Пассивы (обязательства)</h2>
+      <div class="card-content">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Платёж (₽)</th>
               <th>Сумма (₽)</th>
               <th class="actions-col"></th>
             </tr>
           </thead>
-          <tbody id="income-rows"></tbody>
+          <tbody id="liability-rows"></tbody>
         </table>
-        <button class="category-add" data-section="income">+ Добавить доход</button>
+        <button class="category-add" data-section="liability">+ Взять кредит</button>
       </div>
     </section>
 
@@ -811,97 +877,20 @@
       </div>
     </section>
 
-    <section class="card col-6">
-      <h2>Акции</h2>
+    <section class="card col-12">
+      <h2>Доходы (в месяц)</h2>
       <div class="card-content">
         <table class="data-table">
           <thead>
             <tr>
               <th>Название</th>
-              <th>Цена (₽)</th>
-              <th>Кол-во</th>
-              <th>Сумма (₽)</th>
-              <th class="actions-col">Действия</th>
-            </tr>
-          </thead>
-          <tbody id="stocks-rows"></tbody>
-        </table>
-        <button class="category-add" data-section="stocks">+ Купить акции</button>
-      </div>
-    </section>
-
-    <section class="card col-6">
-      <h2>Недвижимость</h2>
-      <div class="card-content">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Название</th>
-              <th>Первый взнос (₽)</th>
-              <th>Ипотека (₽)</th>
-              <th>Денежный поток (₽)</th>
-              <th class="actions-col"></th>
-            </tr>
-          </thead>
-          <tbody id="property-rows"></tbody>
-        </table>
-        <button class="category-add" data-section="property">+ Купить недвижимость</button>
-      </div>
-    </section>
-
-    <section class="card col-6">
-      <h2>Пассивы (обязательства)</h2>
-      <div class="card-content">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Название</th>
-              <th>Платёж (₽)</th>
               <th>Сумма (₽)</th>
               <th class="actions-col"></th>
             </tr>
           </thead>
-          <tbody id="liability-rows"></tbody>
+          <tbody id="income-rows"></tbody>
         </table>
-        <button class="category-add" data-section="liability">+ Взять кредит</button>
-      </div>
-    </section>
-
-    <section class="card col-12 deals-section" id="deals-section">
-      <h2>Инвестиционные сделки</h2>
-      <div class="card-content">
-        <div class="grid deals-grid">
-          <div class="col-6">
-            <h3 class="deal-subtitle">Малые сделки</h3>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Название</th>
-                  <th>Стоимость (₽)</th>
-                  <th>Доход/мес (₽)</th>
-                  <th>Описание</th>
-                  <th class="actions-col"></th>
-                </tr>
-              </thead>
-              <tbody id="small-deals-list"></tbody>
-            </table>
-          </div>
-          <div class="col-6">
-            <h3 class="deal-subtitle">Крупные сделки</h3>
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>Название</th>
-                  <th>Стоимость (₽)</th>
-                  <th>Доход/мес (₽)</th>
-                  <th>Описание</th>
-                  <th class="actions-col"></th>
-                </tr>
-              </thead>
-              <tbody id="big-deals-list"></tbody>
-            </table>
-          </div>
-        </div>
+        <button class="category-add" data-section="income">+ Добавить доход</button>
       </div>
     </section>
 
@@ -921,12 +910,51 @@
         <button class="category-add" data-section="passive">+ Добавить источник пассивного дохода</button>
       </div>
     </section>
-  </div>
 
-  <div class="dirty-footer" id="dirty-footer">
-    <span class="dirty-label">● Есть незафиксированные изменения</span>
-    <button class="primary" id="commit">Подтвердить</button>
-    <button id="revert">Отменить</button>
+    <section class="card col-12">
+      <h2>Итоги</h2>
+      <div class="summary">
+        <div class="metric">
+          <div class="name">Общий доход</div>
+          <div class="value neutral" id="total-income">0 ₽</div>
+          <div class="change" id="change-total-income"></div>
+        </div>
+        <div class="metric">
+          <div class="name">Общие расходы</div>
+          <div class="value negative" id="total-expenses">0 ₽</div>
+          <div class="change" id="change-total-expenses"></div>
+        </div>
+        <div class="metric">
+          <div class="name">Пассивный доход</div>
+          <div class="value positive" id="total-passive">0 ₽</div>
+          <div class="change" id="change-total-passive"></div>
+        </div>
+        <div class="metric">
+          <div class="name">Денежный поток</div>
+          <div class="value" id="summary-cashflow">0 ₽</div>
+          <div class="change" id="change-summary-cashflow"></div>
+        </div>
+        <div class="metric">
+          <div class="name">Наличность</div>
+          <div class="value neutral" id="summary-cash-on-hand">0 ₽</div>
+          <div class="change" id="change-summary-cash-on-hand"></div>
+        </div>
+        <div class="metric">
+          <div class="name">Чистые активы</div>
+          <div class="value positive" id="net-worth">0 ₽</div>
+          <div class="change" id="change-net-worth"></div>
+        </div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-labels">
+          <span>Расходы</span>
+          <span>Доходы + Пассив</span>
+        </div>
+        <div class="bar"><i id="balance-indicator"></i></div>
+        <div class="hint" id="status-text">Введите данные, чтобы увидеть расчёт</div>
+      </div>
+
+    </section>
   </div>
 
   <div id="transition-overlay" class="transition-overlay">
@@ -2328,14 +2356,22 @@ function updateSummary(state) {
   const cfEl = document.getElementById('cashflow');
   cfEl.textContent = fmt(t.cashflow);
   cfEl.className = 'value ' + (t.cashflow > 0 ? 'positive' : t.cashflow < 0 ? 'negative' : 'neutral');
+  const summaryCfEl = document.getElementById('summary-cashflow');
+  summaryCfEl.textContent = fmt(t.cashflow);
+  summaryCfEl.className = 'value ' + (t.cashflow > 0 ? 'positive' : t.cashflow < 0 ? 'negative' : 'neutral');
   document.getElementById('net-worth').textContent = fmt(t.netWorth);
   document.getElementById('cash-on-hand').textContent = fmt(state.cashOnHand);
+  const summaryCashEl = document.getElementById('summary-cash-on-hand');
+  summaryCashEl.textContent = fmt(state.cashOnHand);
+  summaryCashEl.className = 'value neutral';
   
   updateChangeIndicator('change-total-income', t.totalIncome, c.totalIncome, 'income');
   updateChangeIndicator('change-total-expenses', t.totalExpense, c.totalExpense, 'expense');
   updateChangeIndicator('change-total-passive', t.totalPassive, c.totalPassive, 'income');
   updateChangeIndicator('change-cashflow', t.cashflow, c.cashflow, 'income');
+  updateChangeIndicator('change-summary-cashflow', t.cashflow, c.cashflow, 'income');
   updateChangeIndicator('change-cash-on-hand', state.cashOnHand, committed.cashOnHand, 'neutral');
+  updateChangeIndicator('change-summary-cash-on-hand', state.cashOnHand, committed.cashOnHand, 'neutral');
   updateChangeIndicator('change-net-worth', t.netWorth, c.netWorth, 'income');
 
   const balance = t.totalIncome + t.totalExpense;
@@ -2399,11 +2435,12 @@ function hasChanges() {
 }
 
 function updateDirtyFooter() {
-  const footer = document.getElementById('dirty-footer');
-  if (hasChanges()) {
-    footer.classList.add('visible');
+  const header = document.getElementById('dirty-header');
+  const visible = hasChanges();
+  if (visible) {
+    header.classList.add('visible');
   } else {
-    footer.classList.remove('visible');
+    header.classList.remove('visible');
   }
   updateSectionHighlights();
 }
@@ -2593,8 +2630,8 @@ document.getElementById('collect-cashflow').addEventListener('click', collectCas
 document.getElementById('quit-job').addEventListener('click', quitJob);
 document.getElementById('add-cash').addEventListener('click', addCash);
 document.getElementById('remove-cash').addEventListener('click', removeCash);
-document.getElementById('commit').addEventListener('click', commit);
-document.getElementById('revert').addEventListener('click', revert);
+document.getElementById('commit-top').addEventListener('click', commit);
+document.getElementById('revert-top').addEventListener('click', revert);
 document.getElementById('confirm-buy-property').addEventListener('click', confirmBuyProperty);
 document.getElementById('cancel-buy-property').addEventListener('click', cancelBuyProperty);
 document.getElementById('confirm-buy-stocks').addEventListener('click', confirmBuyStocks);
