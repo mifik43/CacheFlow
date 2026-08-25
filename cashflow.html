@@ -263,42 +263,6 @@
   .custom-row { animation: fadeIn 0.2s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
 
-  .row-diff-added {
-    background: rgba(74,222,128,0.2);
-    border-left: 4px solid var(--green);
-    margin-left: -4px;
-  }
-  .row-diff-added .rname, .row-diff-added .rvalue, .row-diff-added .rpayment {
-    color: var(--green);
-    font-weight: 600;
-  }
-  .row-diff-added::before {
-    content: '+';
-    position: absolute;
-    left: -20px;
-    color: var(--green);
-    font-weight: 700;
-  }
-  .row-diff-removed {
-    background: rgba(248,113,113,0.2);
-    border-left: 4px solid var(--red);
-    margin-left: -4px;
-  }
-  .row-diff-removed .rname, .row-diff-removed .rvalue, .row-diff-removed .rpayment {
-    color: var(--red);
-    text-decoration: line-through;
-    font-weight: 600;
-  }
-  .row-diff-modified {
-    background: rgba(251,191,36,0.2);
-    border-left: 4px solid var(--amber);
-    margin-left: -4px;
-  }
-  .row-diff-modified .rname, .row-diff-modified .rvalue, .row-diff-modified .rpayment {
-    color: var(--amber);
-    font-weight: 600;
-  }
-
   .dirty-footer {
     display: none;
     position: fixed;
@@ -368,6 +332,24 @@
   .deal-card button {
     font-size: 12px;
     padding: 4px 8px;
+  }
+  .deal-row td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .deal-row td:first-child {
+    font-weight: 600;
+  }
+  .deal-row td:nth-child(2) {
+    color: var(--amber);
+  }
+  .deal-row td:nth-child(3) {
+    color: var(--green);
+  }
+  .deal-row td:nth-child(4) {
+    color: var(--muted);
+    font-size: 12px;
   }
   .modal-overlay,
   .win-overlay,
@@ -513,15 +495,164 @@
   #escape-indicator { width: 0%; }
   #settings-btn { margin-left: 8px; }
   .profession-label { color: var(--muted); font-size: 14px; }
-  .row-removed { opacity: 0.5; pointer-events: none; }
   .btn-hidden { display: none; }
   .change-good { color: var(--green); }
   .change-bad { color: var(--red); }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  .data-table .actions-col {
+    width: 80px;
+    text-align: center;
+  }
+  .data-table tr:last-child td {
+    border-bottom: none;
+  }
+  .data-table .rname {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 14px;
+    width: 100%;
+  }
+  .data-table .rname:hover {
+    border-color: var(--border);
+  }
+  .data-table .rname:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #0b1220;
+  }
+  .data-table .rvalue {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 14px;
+    text-align: right;
+    width: 100%;
+  }
+  .data-table .rvalue:hover {
+    border-color: var(--border);
+  }
+  .data-table .rvalue:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #0b1220;
+  }
+  .data-table .rpayment {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 14px;
+    text-align: right;
+  }
+  .data-table .remove,
+  .data-table .sell-asset,
+  .data-table .stock-buy,
+  .data-table .stock-sell {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .data-table .remove:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .data-table .sell-asset:hover {
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+  .data-table .stock-buy:hover {
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .data-table .stock-sell:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+  .data-table .btn-hidden {
+    display: none;
+  }
+  .data-table .row-diff-added td:first-child {
+    border-left: 4px solid var(--green);
+    padding-left: 6px;
+  }
+  .data-table .row-diff-added td {
+    background: rgba(74,222,128,0.2);
+    color: var(--green);
+    font-weight: 600;
+  }
+  .data-table .row-diff-removed td:first-child {
+    border-left: 4px solid var(--red);
+    padding-left: 6px;
+  }
+  .data-table .row-diff-removed td {
+    background: rgba(248,113,113,0.2);
+    color: var(--red);
+    text-decoration: line-through;
+    font-weight: 600;
+  }
+  .data-table .row-diff-modified td:first-child {
+    border-left: 4px solid var(--amber);
+    padding-left: 6px;
+  }
+  .data-table .row-diff-modified td {
+    background: rgba(251,191,36,0.2);
+    color: var(--amber);
+    font-weight: 600;
+  }
+  .data-table .row-removed {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .data-table .row-removed td {
+    opacity: 0.5;
+  }
+  .data-table .row-removed .rname,
+  .data-table .row-removed .rvalue,
+  .data-table .row-removed .rpayment {
+    pointer-events: none;
+  }
+
   @media (max-width: 640px) {
-    .game-banner { font-size: 13px; padding: 8px 12px; }
-    .deal-card .deal-header { flex-direction: column; align-items: flex-start; }
-    .win-modal, .transition-modal { padding: 24px 18px; }
-    .cash-actions button { width: 100%; }
+    .data-table th,
+    .data-table td {
+      padding: 4px 6px;
+      font-size: 12px;
+    }
+    .data-table .rname,
+    .data-table .rvalue,
+    .data-table .rpayment {
+      padding: 4px 6px;
+      font-size: 12px;
+    }
   }
 </style>
 </head>
@@ -618,7 +749,16 @@
     <section class="card col-12">
       <h2>Доходы (в месяц)</h2>
       <div class="card-content">
-        <div id="income-rows"></div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Сумма (₽)</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody id="income-rows"></tbody>
+        </table>
         <button class="category-add" data-section="income">+ Добавить доход</button>
       </div>
     </section>
@@ -626,7 +766,16 @@
     <section class="card col-6">
       <h2>Расходы (в месяц)</h2>
       <div class="card-content">
-        <div id="expense-rows"></div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Сумма (₽)</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody id="expense-rows"></tbody>
+        </table>
         <button class="category-add" data-section="expense">+ Добавить расход</button>
       </div>
     </section>
@@ -634,7 +783,16 @@
     <section class="card col-6">
       <h2>Сбережения / Активы</h2>
       <div class="card-content">
-        <div id="asset-rows"></div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Стоимость (₽)</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody id="asset-rows"></tbody>
+        </table>
         <button class="category-add" data-section="asset">+ Добавить актив</button>
       </div>
     </section>
@@ -642,7 +800,18 @@
     <section class="card col-6">
       <h2>Акции</h2>
       <div class="card-content">
-        <div id="stocks-rows"></div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Цена (₽)</th>
+              <th>Кол-во</th>
+              <th>Сумма (₽)</th>
+              <th class="actions-col">Действия</th>
+            </tr>
+          </thead>
+          <tbody id="stocks-rows"></tbody>
+        </table>
         <button class="category-add" data-section="stocks">+ Купить акции</button>
       </div>
     </section>
@@ -650,7 +819,18 @@
     <section class="card col-6">
       <h2>Недвижимость</h2>
       <div class="card-content">
-        <div id="property-rows"></div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Первый взнос (₽)</th>
+              <th>Ипотека (₽)</th>
+              <th>Денежный поток (₽)</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody id="property-rows"></tbody>
+        </table>
         <button class="category-add" data-section="property">+ Купить недвижимость</button>
       </div>
     </section>
@@ -658,7 +838,17 @@
     <section class="card col-6">
       <h2>Пассивы (обязательства)</h2>
       <div class="card-content">
-        <div id="liability-rows"></div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Платёж (₽)</th>
+              <th>Сумма (₽)</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody id="liability-rows"></tbody>
+        </table>
         <button class="category-add" data-section="liability">+ Взять кредит</button>
       </div>
     </section>
@@ -669,11 +859,33 @@
         <div class="grid deals-grid">
           <div class="col-6">
             <h3 class="deal-subtitle">Малые сделки</h3>
-            <div id="small-deals-list"></div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Стоимость (₽)</th>
+                  <th>Доход/мес (₽)</th>
+                  <th>Описание</th>
+                  <th class="actions-col"></th>
+                </tr>
+              </thead>
+              <tbody id="small-deals-list"></tbody>
+            </table>
           </div>
           <div class="col-6">
             <h3 class="deal-subtitle">Крупные сделки</h3>
-            <div id="big-deals-list"></div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Стоимость (₽)</th>
+                  <th>Доход/мес (₽)</th>
+                  <th>Описание</th>
+                  <th class="actions-col"></th>
+                </tr>
+              </thead>
+              <tbody id="big-deals-list"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -682,7 +894,16 @@
     <section class="card col-6">
       <h2>Пассивный доход (в месяц)</h2>
       <div class="card-content">
-        <div id="passive-rows"></div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Название</th>
+              <th>Доход (₽)</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody id="passive-rows"></tbody>
+        </table>
         <button class="category-add" data-section="passive">+ Добавить источник пассивного дохода</button>
       </div>
     </section>
@@ -1135,11 +1356,13 @@ function fmt(n) {
 function rowHTML(name='', value='', isCurrency=false, diffClass='', removed=false) {
   const diffCls = diffClass ? ` ${diffClass}` : '';
   const removedCls = removed ? ' row-removed' : '';
-  return `<div class="row${diffCls}${removedCls}">
-    <input type="text" class="rname" placeholder="Название" value="${name}" inputmode="text" ${removed ? 'disabled' : ''} />
-    <input type="number" class="rvalue" placeholder="0" value="${value}" step="1" inputmode="numeric" ${removed ? 'disabled' : ''} />
-    <button class="remove" title="Удалить" aria-label="Удалить" ${removed ? 'class="remove btn-hidden"' : ''}>✕</button>
-  </div>`;
+  const disabledAttr = removed ? 'disabled' : '';
+  const hiddenClass = removed ? ' btn-hidden' : '';
+  return `<tr class="data-row${diffCls}${removedCls}">
+    <td><input type="text" class="rname" placeholder="Название" value="${name}" inputmode="text" ${disabledAttr} /></td>
+    <td><input type="number" class="rvalue" placeholder="0" value="${value}" step="1" inputmode="numeric" ${disabledAttr} /></td>
+    <td class="actions-col"><button class="remove${hiddenClass}" title="Удалить" aria-label="Удалить">✕</button></td>
+  </tr>`;
 }
 
 function getRowDiffClass(section, idx) {
@@ -1162,15 +1385,16 @@ function renderSection(section) {
       const diffCls = diffClass ? ` ${diffClass}` : '';
       const removed = item._removed;
       const removedCls = removed ? ' row-removed' : '';
-      return `<div class="row${diffCls}${removedCls}">
-        <input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" ${removed ? 'disabled' : ''} />
-        <span class="rpayment">${fmt(Number(item.payment) || 0)}</span>
-        <span class="rvalue">${fmt(Number(item.value) || 0)}</span>
-        <button class="remove" title="Удалить" aria-label="Удалить" ${removed ? 'class="remove btn-hidden"' : ''}>✕</button>
-      </div>`;
+      const hiddenClass = removed ? ' btn-hidden' : '';
+      return `<tr class="data-row${diffCls}${removedCls}">
+        <td><input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" ${removed ? 'disabled' : ''} /></td>
+        <td><span class="rpayment">${fmt(Number(item.payment) || 0)}</span></td>
+        <td><span class="rvalue">${fmt(Number(item.value) || 0)}</span></td>
+        <td class="actions-col"><button class="remove${hiddenClass}" title="Удалить" aria-label="Удалить">✕</button></td>
+      </tr>`;
     }).join('');
     
-    container.querySelectorAll('.row').forEach((row, idx) => {
+    container.querySelectorAll('.data-row').forEach((row, idx) => {
       const item = pending[section][idx];
       
       row.querySelector('.rname').addEventListener('input', e => {
@@ -1208,14 +1432,15 @@ function renderSection(section) {
       const diffCls = diffClass ? ` ${diffClass}` : '';
       const removed = item._removed;
       const removedCls = removed ? ' row-removed' : '';
-      return `<div class="row${diffCls}${removedCls}">
-        <input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" ${removed ? 'disabled' : ''} />
-        <span class="rvalue">${fmt(Number(item.value) || 0)}</span>
-        <button class="sell-asset" data-idx="${idx}" title="Продать" aria-label="Продать" ${removed ? 'class="sell-asset btn-hidden"' : ''}>Продать</button>
-      </div>`;
+      const hiddenClass = removed ? ' btn-hidden' : '';
+      return `<tr class="data-row${diffCls}${removedCls}">
+        <td><input type="text" class="rname" placeholder="Название" value="${item.name}" inputmode="text" ${removed ? 'disabled' : ''} /></td>
+        <td><span class="rvalue">${fmt(Number(item.value) || 0)}</span></td>
+        <td class="actions-col"><button class="sell-asset${hiddenClass}" data-idx="${idx}" title="Продать" aria-label="Продать">Продать</button></td>
+      </tr>`;
     }).join('');
     
-    container.querySelectorAll('.row').forEach((row, idx) => {
+    container.querySelectorAll('.data-row').forEach((row, idx) => {
       const item = pending[section][idx];
       row.querySelector('.rname').value = item.name;
       row.querySelector('.rname').addEventListener('input', e => {
@@ -1228,7 +1453,7 @@ function renderSection(section) {
     });
   } else {
     container.innerHTML = pending[section].map((item, idx) => rowHTML(item.name, item.value, meta.currency, getRowDiffClass(section, idx), item._removed)).join('');
-    container.querySelectorAll('.row').forEach((row, idx) => {
+    container.querySelectorAll('.data-row').forEach((row, idx) => {
       const item = pending[section][idx];
       row.querySelector('.rname').value = item.name;
       row.querySelector('.rvalue').value = item.value;
@@ -1278,17 +1503,20 @@ function renderStocks() {
     const diffClass = status === 'added' ? 'row-diff-added' : status === 'removed' ? 'row-diff-removed' : status === 'modified' ? 'row-diff-modified' : '';
     const diffCls = diffClass ? ` ${diffClass}` : '';
     const removedCls = removed ? ' row-removed' : '';
-    return `<div class="row${diffCls}${removedCls}">
-      <div class="rname">${stock.name}</div>
-      <div class="rvalue">${fmt(Number(stock.price) || 0)}</div>
-      <div class="rvalue">${Number(stock.count) || 0}</div>
-      <div class="rvalue">${fmt(total)}</div>
-      <button class="stock-buy" title="Купить" aria-label="Купить" ${removed ? 'class="stock-buy btn-hidden"' : ''}>Купить</button>
-      <button class="stock-sell" title="Продать" aria-label="Продать" ${removed ? 'class="stock-sell btn-hidden"' : ''}>Продать</button>
-    </div>`;
+    const hiddenClass = removed ? ' btn-hidden' : '';
+    return `<tr class="data-row${diffCls}${removedCls}">
+      <td>${stock.name}</td>
+      <td>${fmt(Number(stock.price) || 0)}</td>
+      <td>${Number(stock.count) || 0}</td>
+      <td>${fmt(total)}</td>
+      <td class="actions-col">
+        <button class="stock-buy${hiddenClass}" title="Купить" aria-label="Купить">Купить</button>
+        <button class="stock-sell${hiddenClass}" title="Продать" aria-label="Продать">Продать</button>
+      </td>
+    </tr>`;
   }).join('');
 
-  container.querySelectorAll('.row').forEach((row, idx) => {
+  container.querySelectorAll('.data-row').forEach((row, idx) => {
     const stock = pending.stocks[idx];
     if (stock._removed) return;
     const buyBtn = row.querySelector('.stock-buy');
@@ -1548,16 +1776,17 @@ function renderProperties() {
     const diffClass = status === 'added' ? 'row-diff-added' : status === 'removed' ? 'row-diff-removed' : status === 'modified' ? 'row-diff-modified' : '';
     const diffCls = diffClass ? ` ${diffClass}` : '';
     const removedCls = removed ? ' row-removed' : '';
-    return `<div class="row${diffCls}${removedCls}">
-      <div class="rname">${prop.name}</div>
-      <div class="rvalue">${fmt(Number(prop.down) || 0)}</div>
-      <div class="rvalue">${fmt(Number(prop.mortgage) || 0)}</div>
-      <div class="rvalue">${fmt(Number(prop.cashflow) || 0)}</div>
-      <button class="stock-sell" title="Продать" aria-label="Продать" ${removed ? 'class="stock-sell btn-hidden"' : ''}>Продать</button>
-    </div>`;
+    const hiddenClass = removed ? ' btn-hidden' : '';
+    return `<tr class="data-row${diffCls}${removedCls}">
+      <td>${prop.name}</td>
+      <td>${fmt(Number(prop.down) || 0)}</td>
+      <td>${fmt(Number(prop.mortgage) || 0)}</td>
+      <td>${fmt(Number(prop.cashflow) || 0)}</td>
+      <td class="actions-col"><button class="stock-sell${hiddenClass}" title="Продать" aria-label="Продать">Продать</button></td>
+    </tr>`;
   }).join('');
 
-  container.querySelectorAll('.row').forEach((row, idx) => {
+  container.querySelectorAll('.data-row').forEach((row, idx) => {
     const prop = pending.property[idx];
     if (prop._removed) return;
     row.querySelector('.stock-sell').addEventListener('click', () => openSellProperty(idx));
@@ -1918,27 +2147,23 @@ function renderDeals() {
   const bigList = document.getElementById('big-deals-list');
   
   smallList.innerHTML = FAST_TRACK_DEALS.small.map((deal, idx) => `
-    <div class="deal-card">
-      <div class="deal-header">
-        <div class="deal-name">${deal.name}</div>
-        <div class="deal-cost">-${fmt(deal.cost)}</div>
-      </div>
-      <div class="deal-desc">${deal.desc}</div>
-      <div class="deal-income">+${fmt(deal.income)}/мес</div>
-      <button class="primary" onclick="buyDeal('small', ${idx})">Купить</button>
-    </div>
+    <tr class="deal-row">
+      <td>${deal.name}</td>
+      <td>-${fmt(deal.cost)}</td>
+      <td>+${fmt(deal.income)}/мес</td>
+      <td>${deal.desc}</td>
+      <td class="actions-col"><button class="primary" onclick="buyDeal('small', ${idx})">Купить</button></td>
+    </tr>
   `).join('');
   
   bigList.innerHTML = FAST_TRACK_DEALS.big.map((deal, idx) => `
-    <div class="deal-card">
-      <div class="deal-header">
-        <div class="deal-name">${deal.name}</div>
-        <div class="deal-cost">-${fmt(deal.cost)}</div>
-      </div>
-      <div class="deal-desc">${deal.desc}</div>
-      <div class="deal-income">+${fmt(deal.income)}/мес</div>
-      <button class="primary" onclick="buyDeal('big', ${idx})">Купить</button>
-    </div>
+    <tr class="deal-row">
+      <td>${deal.name}</td>
+      <td>-${fmt(deal.cost)}</td>
+      <td>+${fmt(deal.income)}/мес</td>
+      <td>${deal.desc}</td>
+      <td class="actions-col"><button class="primary" onclick="buyDeal('big', ${idx})">Купить</button></td>
+    </tr>
   `).join('');
 }
 
